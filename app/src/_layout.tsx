@@ -69,12 +69,12 @@ export const Layout = () => {
             <Stack.Screen
               name="Login"
               component={Login}
-              options={{ headerShown: false, animation: "slide_from_bottom" }}
+              options={{ headerShown: false, animation: "flip" }}
             />
             <Stack.Screen
               name="Register"
               component={Register}
-              options={{ headerShown: false, animation: "slide_from_bottom" }}
+              options={{ headerShown: false, animation: "flip" }}
             />
           </Stack.Group>
         )}
@@ -82,3 +82,4 @@ export const Layout = () => {
     </SafeAreaView>
   );
 };
+

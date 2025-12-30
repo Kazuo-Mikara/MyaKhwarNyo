@@ -13,10 +13,7 @@ interface AuthContextType {
   onRegister: (
     email: string,
     password: string,
-    name: string,
-    gender: string,
-    phone: string,
-    dateOfBirth: string
+    name: string
   ) => Promise<{ success: boolean; error?: any }>;
   onLogout: () => Promise<any>;
 }
@@ -64,25 +61,10 @@ export const AuthProvider = ({ children }: any) => {
     checkUserStatus();
   }, []);
 
-  const register = async (
-    email: string,
-    password: string,
-    name: string,
-    dateOfBirth: Date,
-    gender: string,
-    phone: string
-  ) => {
+  const register = async (email: string, password: string, name: string) => {
     setLoading(true);
     try {
-      await account.create(
-        ID.unique(),
-        email,
-        password,
-        name,
-        dateOfBirth,
-        gender,
-        phone
-      );
+      await account.create(ID.unique(), email, password, name);
       // Auto login after registration
       return { success: true };
     } catch (error) {

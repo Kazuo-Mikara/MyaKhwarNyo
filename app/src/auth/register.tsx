@@ -1,8 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import Entypo from "@expo/vector-icons/Entypo";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
   Alert,
@@ -24,6 +22,7 @@ const Login = ({ navigation }: any) => {
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [confirmTerms, setConfirmTerms] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [dateOfBirthString, setDateOfBirthString] = useState(
     new Date().toDateString()
@@ -33,6 +32,24 @@ const Login = ({ navigation }: any) => {
   console.log(dateOfBirth);
   console.log(dateOfBirthString);
 
+  const handleRegister = async () => {
+    if (!email && !password) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+    if (email && password) {
+      try {
+        const response = await onRegister(email, password, userName);
+        if (response.success) {
+          Alert.alert("Success", "User registered successfully");
+          navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Error", "User registration failed");
+      }
+    }
+  };
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -49,29 +66,6 @@ const Login = ({ navigation }: any) => {
       setShowPicker(false);
     } else {
       handleDatePicker();
-    }
-  };
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill all fields");
-      return;
-    }
-    if (email && password) {
-      try {
-        const response = await onRegister(
-          email,
-          password,
-          userName,
-          dateOfBirthString,
-          gender,
-          phone
-        );
-        if (response.success) {
-          navigation.navigate("Login");
-        }
-      } catch (error) {
-        console.log(error);
-      }
     }
   };
 
@@ -109,7 +103,7 @@ const Login = ({ navigation }: any) => {
             position: "absolute",
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(255,255,255,0.1)",
+            backgroundColor: "rgba(255,255,255,0.2)",
           }}
         ></View>
         <TouchableOpacity
@@ -208,7 +202,7 @@ const Login = ({ navigation }: any) => {
             />
           </View>
           {/* Date of Birth Input */}
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {/* <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TouchableOpacity onPress={handleDatePicker} style={{ flex: 1 }}>
               <View
                 style={{
@@ -255,7 +249,7 @@ const Login = ({ navigation }: any) => {
                 )}
               </View>
             </TouchableOpacity>
-          </View>
+          </View> */}
           {/* Password Input */}
           <View
             style={{
@@ -311,7 +305,7 @@ const Login = ({ navigation }: any) => {
               color={Colors.light.text_form}
             />
             <TextInput
-              placeholder="Password"
+              placeholder="Confirm Password"
               placeholderTextColor={Colors.light.text_form}
               style={{
                 flex: 1,
@@ -351,7 +345,7 @@ const Login = ({ navigation }: any) => {
                 color={
                   rememberMe
                     ? Colors.light.text_primary
-                    : Colors.light.text_form
+                    : Colors.light.text_secondary
                 }
               />
               <Text
@@ -359,31 +353,72 @@ const Login = ({ navigation }: any) => {
                   marginLeft: 8,
                   fontFamily: "GoogleSansFlex-Regular",
                   fontSize: 14,
+                  fontWeight: rememberMe ? "bold" : "normal",
                   color: rememberMe
                     ? Colors.light.text_primary
-                    : Colors.light.text_form,
+                    : Colors.light.text_secondary,
                 }}
               >
                 Remember Me
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity>
               <Text
                 style={{
                   fontFamily: "GoogleSansFlex-Bold",
                   fontSize: 14,
-                  color: Colors.light.text_form,
+                  color: Colors.light.text_secondary,
                 }}
               >
                 Forgot Password?
               </Text>
             </TouchableOpacity>
           </View>
-
+          {/* Terms & Conditions */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <TouchableOpacity onPress={() => setConfirmTerms(!confirmTerms)}>
+              <Ionicons
+                name={confirmTerms ? "checkmark-circle" : "ellipse-outline"}
+                size={22}
+                color={
+                  confirmTerms
+                    ? Colors.light.text_primary
+                    : Colors.light.text_secondary
+                }
+              />
+            </TouchableOpacity>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <Text
+                style={{
+                  fontFamily: "GoogleSansFlex-Regular",
+                  fontSize: 14,
+                  fontWeight: confirmTerms ? "bold" : "normal",
+                  color: confirmTerms
+                    ? Colors.light.text_primary
+                    : Colors.light.text_secondary,
+                }}
+              >
+                I agree to
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "GoogleSansFlex-Bold",
+                  textDecorationLine: "underline",
+                  fontSize: 14,
+                  color: confirmTerms
+                    ? Colors.light.text_primary
+                    : Colors.light.text_secondary,
+                }}
+              >
+                Terms and Conditions.
+              </Text>
+            </View>
+          </View>
           {/* Login Button */}
           <TouchableOpacity
-            onPress={handleLogin}
+            onPress={handleRegister}
             style={{
               backgroundColor: Colors.light.bg_secondary,
               paddingVertical: 18,
