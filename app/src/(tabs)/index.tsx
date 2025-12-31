@@ -1,48 +1,23 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import fetchData from "@/hooks/fetchData";
+import { Entypo } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   FlatList,
-  Image,
-  Pressable,
+  ImageBackground,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
-import fetchData from "@/hooks/fetchData";
-import { Feather } from "@expo/vector-icons";
-import { Link } from "expo-router";
-interface Pokemon {
-  name: string;
-  image: string;
-  imageBack: string;
-  type: PokemonType[];
-}
-
-interface PokemonType {
-  type: {
-    name: string;
-    url: string;
-  };
-}
-
-const colorsByType = {
-  grass: "#7ac74c",
-  fire: "#ee8130",
-  water: "#6390f0",
-  bug: "#a6b91a",
-  normal: "#a8a77a",
-};
-
+// url: "https://westmountflorist.com/cdn/shop/articles/freya-ingva-6P9JgFe3f9Q-unsplash.jpg",
 const flowers = [
   {
     name: "daisy",
     scientificName: "Bellis perennis",
-    url: "https://westmountflorist.com/cdn/shop/articles/freya-ingva-6P9JgFe3f9Q-unsplash.jpg",
+    url: "https://imgcdn.stablediffusionweb.com/2024/12/3/40412e1e-1190-423d-b0ac-6ff59568ff6a.jpg",
     date: "Today, 9:00AM",
   },
   {
@@ -57,63 +32,10 @@ const flowers = [
     url: "https://www.colorblends.com/wp-content/uploads/2020/01/1504_BestPurple_CGC2662sq.jpg",
     date: "September 8",
   },
-  {
-    name: "lily",
-    scientificName: "Lilium",
-    url: "https://wp.plantsnap.com/wp-content/uploads/2019/08/lily-3520837_1280-1024x682.jpg",
-    date: "March 25",
-  },
-  {
-    name: "daffodil",
-    scientificName: "Narcissus pseudonarcissus",
-    url: "https://substackcdn.com/image/fetch/$s_!EhPK!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F20ca0b85-2a08-45e4-bef2-3c201e461161_2865x1920.jpeg",
-    date: "March 25",
-  },
-  {
-    name: "red rose",
-    scientificName: "Rosa gallica",
-    url: "https://www.ebloomsdirect.com/cdn/shop/files/FortuneRoses_1_1024x1024.png?v=1738433013",
-    date: "February 25",
-  },
-  {
-    name: "lavender",
-    scientificName: "Lavandula angustifolia",
-    url: "https://cloversgarden.com/cdn/shop/products/CGHidcoteLavenderPrimary_1200x1200.jpg?v=1679602241",
-    date: "June 15",
-  },
-  {
-    name: "orchid",
-    scientificName: "Orchidaceae",
-    url: "https://static.vecteezy.com/system/resources/previews/007/420/322/large_2x/orchidaceae-is-a-diverse-and-widespread-family-of-flowering-plants-with-blooms-that-are-often-colourful-and-often-fragrant-free-photo.jpg",
-    date: "May 10",
-  },
-  {
-    name: "marigold",
-    scientificName: "Tagetes",
-    url: "https://smliving.net/wp-content/uploads/2024/09/marigolds-1170x731.jpg",
-    date: "August 20",
-  },
-  {
-    name: "hydrangea",
-    scientificName: "Hydrangea macrophylla",
-    url: "https://www.tytyga.com/v/vspfiles/photos/SHRFLR-HYD-NIKKO-2T.jpg",
-    date: "July 4",
-  },
-  {
-    name: "peony",
-    scientificName: "Paeonia",
-    url: "https://images.squarespace-cdn.com/content/v1/604c31ef22e44a51184b36cc/1654917745714-7X4NWLS0ACVX4VFO8L1E/unsplash-image-3G_tK4V4lcs.jpg",
-    date: "April 18",
-  },
-  {
-    name: "jasmine",
-    scientificName: "Jasminum officinale",
-    url: "https://www.gardenia.net/wp-content/uploads/2016/06/shutterstock_2488077975.jpg",
-    date: "January 12",
-  },
 ];
 export default function Home() {
   const [camera, setCamera] = useState(false);
+  const [location, setLocation] = useState("");
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const { data, isLoading } = useQuery({
@@ -122,19 +44,24 @@ export default function Home() {
       return await fetchData();
     },
   });
-  // console.log(data);
+  console.log(data);
   return (
     <ScrollView
       contentContainerStyle={{
         padding: 10,
         flex: 1,
         gap: 16,
-        backgroundColor: "#f0efee",
+        backgroundColor: "#f1f1f1",
       }}
     >
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
       <View
         style={{
-          flexDirection: "row",
+          flexDirection: "row-reverse",
           alignItems: "center",
           justifyContent: "space-between",
         }}
@@ -147,129 +74,100 @@ export default function Home() {
             justifyContent: "center",
           }}
         >
-          <Image
-            source={require("../../../assets/images/user_avatar.png")}
-            width={40}
-            height={40}
-          />
-          <Text
-            className="text-blue-800 "
+          <View
             style={{
-              fontSize: 22,
-              fontFamily: "GoogleSansFlex-Black",
-              textTransform: "capitalize",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              backgroundColor: "black",
+              borderRadius: 100,
             }}
           >
-            Identify AI
+            <Entypo name="cloud" size={24} color="white" />
+            <Text
+              style={{
+                fontSize: 10,
+                color: "#f1f1f1",
+                fontFamily: "GoogleSansFlex-Regular",
+                textTransform: "capitalize",
+              }}
+            >
+              {location ? location : "Tap to set location"}
+            </Text>
+          </View>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontFamily: "GoogleSansFlex-Black",
+            }}
+          >
+            Mya Khwar Nyo
           </Text>
         </View>
-        <View style={{ flexDirection: "row", gap: 16 }}>
-          <Pressable
-            onPress={() => {
-              console.log("search clicked");
-            }}
-          ></Pressable>
-          <Pressable>
-            <Ionicons name="notifications-outline" size={24} color="black" />
-          </Pressable>
-        </View>
-      </View>
-      <View className="flex-row gap-2 w-full h-20 items-center justify-between p-1 rounded-2xl">
-        <View className="flex-row gap-2  bg-white w-[85%] px-4 py-2 items-center rounded-2xl">
-          <Feather className="" name="search" size={20} color="gray" />
-          <TextInput
-            style={{
-              fontFamily: "GoogleSansFlex-Regular",
-            }}
-            placeholder="Search Plants"
-            className="w-[90%] overflow-hidden text-gray-500"
-          />
-        </View>
-        <TouchableOpacity onPress={() => console.log("camera clicked")}>
-          <View className="bg-[#a3c6a9] p-4 rounded-2xl">
-            <Ionicons
-              name="camera-outline"
-              size={24}
-              color="#f9f9f9"
-              className=""
-            />
-          </View>
-        </TouchableOpacity>
       </View>
 
-      <View>
+      <View className="mt-4">
         <View className="flex-row justify-between">
           <Text>Recent Scans</Text>
           <Text className="text-green-500 underline">See All</Text>
         </View>
-        <View>
-          <FlatList
-            data={flowers}
-            renderItem={({ item }) => (
-              <View className="flex gap-2 p-2">
-                <Link
-                  href={{
-                    pathname: "/src/screens/details",
-                    params: { name: item.name },
-                  }}
-                >
-                  <View className="flex-col gap-2">
-                    <View className="relative w-30 ">
-                      <Image
-                        source={{ uri: item.url }}
-                        className="w-full h-32 rounded-md"
-                      />
-                      <View
-                        style={{
-                          backgroundColor: "rgba(0, 0, 0, 0.8)",
-                          top: 5,
-                          right: 2,
-                          position: "absolute",
-                        }}
-                        className="px-2 py-1 z-10 rounded-full"
-                      >
-                        <Text
-                          className="text-gray-200"
-                          style={{
-                            fontFamily: "GoogleSansFlex-Light",
-                            fontSize: 10,
-                          }}
-                        >
-                          {item.name}
-                        </Text>
-                      </View>
-                    </View>
-                    <View className="w-24">
-                      <Text
-                        style={{
-                          textOverflow: "ellipsis",
-                          overflow: "hidden",
-                          fontFamily: "GoogleSansFlex-Regular",
-                          fontSize: 12,
-                        }}
-                        className="text-center "
-                      >
-                        {item.scientificName}
-                      </Text>
-                      <Text
-                        className="text-center "
-                        style={{
-                          fontFamily: "GoogleSansFlex-Light",
-                          fontSize: 10,
-                        }}
-                      >
-                        {item.date}
-                      </Text>
+        <View className="mt-2">
+          {flowers && (
+            <FlatList
+              data={flowers}
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              renderItem={({ item, index }) => (
+                <View>
+                  <ImageBackground
+                    source={{ uri: item.url }}
+                    resizeMode="cover"
+                    style={{ width: 400, height: 200, position: "relative" }}
+                  />
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      position: "absolute",
+                      bottom: 10,
+                      left: 0,
+                      right: 0,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginHorizontal: 5,
+                        padding: 0.2,
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        borderRadius: 100,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowColor: "black",
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                      }}
+                    >
+                      {flowers.map((_, i) => (
+                        <Entypo
+                          key={i}
+                          name="dot-single"
+                          size={24}
+                          color={i === index ? "white" : "gray"}
+                        />
+                      ))}
                     </View>
                   </View>
-                </Link>
-              </View>
-            )}
-            keyExtractor={(item) => item.name}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-          />
+                </View>
+              )}
+            />
+          )}
         </View>
       </View>
     </ScrollView>

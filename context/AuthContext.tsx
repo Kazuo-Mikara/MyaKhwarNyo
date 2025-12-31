@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }: any) => {
   const [loading, setLoading] = useState(true);
 
   const checkUserStatus = async () => {
+    setLoading(true);
     try {
       let accountDetails = await account.get();
       setUser(accountDetails);
@@ -52,9 +53,7 @@ export const AuthProvider = ({ children }: any) => {
       setUser(null);
       setAuthState({ authticated: false });
     } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+      setLoading(false);
     }
   };
   useEffect(() => {

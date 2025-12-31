@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -15,12 +16,13 @@ import {
   View,
 } from "react-native";
 
-const Login = ({ navigation }: any) => {
+const Login = ({}: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { onLogin } = useAuth();
+  const navigation = useNavigation();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);

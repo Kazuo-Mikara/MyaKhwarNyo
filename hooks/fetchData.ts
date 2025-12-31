@@ -1,24 +1,40 @@
-import { Pokemon } from "../constants/types";
-const fetchData = async () => {
-    const response = await fetch("https://pokeapi.co/api/v2/pokemon/");
-    const data = await response.json();
-    const detailedData = await Promise.all(
-        data.results.map(async (pokemon: Pokemon) => {
-            
-            const res=await fetch(pokemon.url);
-            const details=await res.json();
-            return {
-                name: pokemon.name,
-                url: pokemon.url,
-                image: details.sprites.front_default,
-                imageBack: details.sprites.back_default,
-                type:details.types,
-            };
-        }
-        )
-    );
-    return detailedData;
-}
+import { client } from "@/providers/AppWriteClient";
+import { Query, TablesDB } from "react-native-appwrite";
 
+
+const tabbleDb = new TablesDB(client);
+
+interface Flower {
+    $id: string; 
+    commonName: string;
+    scientificName: string;
+    family: string;
+    color: any;
+    nativeRegion: string;
+    height: number;
+    bloomingSeason: string;
+    image_url: string;
+    $createdAt: string; 
+    $updatedAt: string;
+}
+let FlowerList: Flower[] = [];
+const fetchData = async () => {
+    try {
+        const response = await tabbleDb.listRows(
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID as string,
+            process.env.EXPO_PUBLIC_APPWRITE_TABLE_ID as string, 
+            [
+                Query.orderAsc("commonName")
+            ]
+        );
+
+        
+        return response.rows;
+        
+    } catch (error) {
+        console.error("Fetch Data Error:", error);
+        return []; 
+    }
+}
 
 export default fetchData;

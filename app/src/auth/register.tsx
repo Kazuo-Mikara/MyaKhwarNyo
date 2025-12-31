@@ -29,8 +29,6 @@ const Login = ({ navigation }: any) => {
   );
   const [showPicker, setShowPicker] = useState(false);
   const { onRegister } = useAuth();
-  console.log(dateOfBirth);
-  console.log(dateOfBirthString);
 
   const handleRegister = async () => {
     if (!email && !password) {

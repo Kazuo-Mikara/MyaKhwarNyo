@@ -35,7 +35,7 @@ export default function TabsLayout() {
         name="history"
         component={History}
         options={{
-          title: "My Garden",
+          title: "Garden",
           headerShown: false,
         }}
       />

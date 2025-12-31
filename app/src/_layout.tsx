@@ -6,10 +6,13 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../../global.css";
+
+
 import TabsLayout from "./TabsLayout";
 import Welcome from "./auth/index";
 import Login from "./auth/login";
 import Register from "./auth/register";
+import Loading from "./screens/loading";
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
@@ -45,41 +48,41 @@ export default function RootLayout() {
 }
 
 export const Layout = () => {
-  const { authState } = useAuth();
+  const { authState, loading } = useAuth();
   console.log(authState);
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator>
-        {authState?.authticated ? (
+      {loading && <Stack.Screen name="Loading" component={Loading} />}
+      {authState?.authticated ? (
+        <Stack.Navigator>
           <Stack.Screen
             name="Tabs"
             component={TabsLayout}
             options={{ headerShown: false }}
           />
-        ) : (
-          <Stack.Group>
-            <Stack.Screen
-              name="Welcome"
-              component={Welcome}
-              options={{
-                headerShown: false,
-                animation: "slide_from_bottom",
-              }}
-            />
-            <Stack.Screen
-              name="Login"
-              component={Login}
-              options={{ headerShown: false, animation: "flip" }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={Register}
-              options={{ headerShown: false, animation: "flip" }}
-            />
-          </Stack.Group>
-        )}
-      </Stack.Navigator>
+        </Stack.Navigator>
+      ) : (
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Welcome"
+            component={Welcome}
+            options={{
+              headerShown: false,
+              animation: "slide_from_bottom",
+            }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{ headerShown: false, animation: "flip" }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={Register}
+            options={{ headerShown: false, animation: "flip" }}
+          />
+        </Stack.Navigator>
+      )}
     </SafeAreaView>
   );
 };
-

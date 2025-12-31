@@ -21,7 +21,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: "My Garden",
+          title: "Garden",
           headerShown: false,
         }}
       />
