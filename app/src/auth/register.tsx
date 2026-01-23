@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/theme";
-import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
@@ -14,9 +14,10 @@ import {
   View,
 } from "react-native";
 
-const Login = ({ navigation }: any) => {
+const Register = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [userName, setUserName] = useState("");
   const [gender, setGender] = useState("");
   const [phone, setPhone] = useState("");
@@ -28,24 +29,35 @@ const Login = ({ navigation }: any) => {
     new Date().toDateString()
   );
   const [showPicker, setShowPicker] = useState(false);
-  const { onRegister } = useAuth();
 
   const handleRegister = async () => {
-    if (!email && !password) {
+    if (!email || !password || !userName) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
-    if (email && password) {
-      try {
-        const response = await onRegister(email, password, userName);
-        if (response.success) {
-          Alert.alert("Success", "User registered successfully");
-          navigation.navigate("Login");
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          displayName: userName,
+          gender: '',
+          phone: '',
+          dateOfBirth: '',
         }
-      } catch (error) {
-        console.log(error);
-        Alert.alert("Error", "User registration failed");
       }
+    })
+    
+    if (error) {
+      Alert.alert("Error", error.message);
+    } else {
+      Alert.alert("Success", "User registered successfully");
+      navigation.navigate("Login");
     }
   };
   const handleShowPassword = () => {
@@ -53,7 +65,7 @@ const Login = ({ navigation }: any) => {
   };
 
   const handleDatePicker = () => {
-    setShowPicker(!showPicker);
+    setShowPicker(!showPicker); 
   };
 
   const handleDateChange = ({ type }: any, selectedDate: any) => {
@@ -313,8 +325,8 @@ const Login = ({ navigation }: any) => {
                 color: "#333",
               }}
               secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
             />
             <TouchableOpacity onPress={handleShowPassword}>
               <Ionicons
@@ -479,4 +491,4 @@ const Login = ({ navigation }: any) => {
   );
 };
 
-export default Login;
+export default Register;

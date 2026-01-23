@@ -1,4 +1,5 @@
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import AuthProvider from "@/context/AuthProvider";
 import QueryProvider from "@/providers/QueryProvider";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
@@ -48,12 +49,12 @@ export default function RootLayout() {
 }
 
 export const Layout = () => {
-  const { authState, loading } = useAuth();
-  console.log(authState);
+  const { isLoggedIn, isLoading } = useAuth();
+  console.log('isLoggedIn:', isLoggedIn);
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {loading && <Stack.Screen name="Loading" component={Loading} />}
-      {authState?.authticated ? (
+      {isLoading && <Stack.Screen name="Loading" component={Loading} />}
+      {isLoggedIn ? (
         <Stack.Navigator>
           <Stack.Screen
             name="Tabs"

@@ -1,40 +1,16 @@
-import { client } from "@/providers/AppWriteClient";
-import { Query, TablesDB } from "react-native-appwrite";
+import { supabase } from "@/providers/SupabaseClient";
+const flowers = supabase.from("plants");
 
-
-const tabbleDb = new TablesDB(client);
-
-interface Flower {
-    $id: string; 
-    commonName: string;
-    scientificName: string;
-    family: string;
-    color: any;
-    nativeRegion: string;
-    height: number;
-    bloomingSeason: string;
-    image_url: string;
-    $createdAt: string; 
-    $updatedAt: string;
-}
-let FlowerList: Flower[] = [];
 const fetchData = async () => {
     try {
-        const response = await tabbleDb.listRows(
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID as string,
-            process.env.EXPO_PUBLIC_APPWRITE_TABLE_ID as string, 
-            [
-                Query.orderAsc("commonName")
-            ]
-        );
-
-        
-        return response.rows;
-        
+        const { data, error } = await flowers.select("*").order("common_name", { ascending: true });
+        if (error) {
+            throw error;
+        }
+        return data;
     } catch (error) {
         console.error("Fetch Data Error:", error);
-        return []; 
+        return [];
     }
 }
-
 export default fetchData;

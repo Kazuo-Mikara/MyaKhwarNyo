@@ -72,7 +72,7 @@ const Welcome = ({ navigation }: any) => {
             color: Colors.light.text_overpic,
           }}
         >
-          Explore the nature of plants with confidence.
+          Explore the nature of plants.
         </Text>
       </View>
 

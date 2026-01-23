@@ -95,8 +95,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               <Text
                 style={{
                   color: isFocused ? Colors.light.text_primary : "gray",
-                  animationDuration: "1s",
-                  transitionDuration: "1s",
                   fontFamily: "GoogleSansFlex-Regular",
                 }}
               >

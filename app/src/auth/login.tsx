@@ -1,19 +1,19 @@
 import { Colors } from "@/constants/theme";
-import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
-  Alert,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const Login = ({}: any) => {
@@ -21,8 +21,7 @@ const Login = ({}: any) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { onLogin } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -32,13 +31,16 @@ const Login = ({}: any) => {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
-    if (email && password) {
-      try {
-        onLogin(email, password);
-      } catch (error) {
-        console.log(error);
+    else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) {
+        Alert.alert("Error", error.message);
       }
     }
+      
   };
 
   return (
@@ -138,7 +140,7 @@ const Login = ({}: any) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: Colors.light.input_bg,
+                backgroundColor: Colors.light.input_bg_1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -147,11 +149,11 @@ const Login = ({}: any) => {
               <Ionicons
                 name="mail-open-outline"
                 size={22}
-                color={Colors.light.text_form}
+                color={Colors.light.form_text}
               />
               <TextInput
                 placeholder="Email Address"
-                placeholderTextColor={Colors.light.text_form}
+                placeholderTextColor={Colors.light.form_text}
                 style={{
                   flex: 1,
                   marginLeft: 10,
@@ -170,7 +172,7 @@ const Login = ({}: any) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: Colors.light.input_bg,
+                backgroundColor: Colors.light.input_bg_1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -179,11 +181,11 @@ const Login = ({}: any) => {
               <Ionicons
                 name="lock-closed-outline"
                 size={22}
-                color={Colors.light.text_form}
+                color={Colors.light.form_text}
               />
               <TextInput
                 placeholder="Password"
-                placeholderTextColor={Colors.light.text_form}
+                placeholderTextColor={Colors.light.form_text}
                 style={{
                   flex: 1,
                   marginLeft: 10,
@@ -295,7 +297,7 @@ const Login = ({}: any) => {
                   fontFamily: "GoogleSansFlex-Regular",
                   fontSize: 14,
                   color: "gray",
-                }}
+                }}        
               >
                 Don't have an account?{" "}
               </Text>
