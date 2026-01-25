@@ -1,147 +1,134 @@
 import { Colors } from "@/constants/theme";
-import { Feather } from "@expo/vector-icons";
-import Entypo from "@expo/vector-icons/Entypo";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Text } from "@react-navigation/elements";
-import { useLinkBuilder, useTheme } from "@react-navigation/native";
-import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const { colors } = useTheme();
-  const { buildHref } = useLinkBuilder();
-  const icon: Record<string, (props: any) => any> = {
-    index: (props: any) => (
-      <Entypo
-        name="home"
-        size={24}
-        color={props ? Colors.light.text_form : "gray"}
-      />
-    ),
-    explore: (props: any) => (
-      <Feather
-        name="compass"
-        size={24}
-        color={props ? Colors.light.text_form : "gray"}
-      />
-    ),
-    settings: (props: any) => (
-      <Feather
-        name="settings"
-        size={24}
-        color={props ? Colors.light.text_form : "gray"}
-      />
-    ),
-    history: (props: any) => (
-      <Entypo
-        name="flower"
-        size={24}
-        color={props ? Colors.light.text_form : "gray"}
-      />
-    ),
-  };
+import Animated, {
+    FadeInRight,
+    FadeOutRight,
+    LinearTransition
+} from "react-native-reanimated";
 
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
+
+const PRIMARY_COLOR = Colors.light.text_tertiary;
+const SECONDARY_COLOR = Colors.light.text_secondary;
+const ACTIVE_COLOR = Colors.light.input_bg;
+const NavBar: React.FC<BottomTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
   return (
-    <View style={styles.tabbar}>
-      <View style={styles.tabbarButtons}>
-        {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-                ? options.title
-                : route.name;
+    <View style={styles.container}>
+      {state.routes.map((route, index) => {
+        if (["_sitemap", "+not-found"].includes(route.name)) return null;
 
-          const isFocused = state.index === index;
+        const { options } = descriptors[route.key];
+        const label =
+          options.tabBarLabel !== undefined
+            ? options.tabBarLabel
+            : options.title !== undefined
+            ? options.title
+            : route.name;
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
+        const isFocused = state.index === index;
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
-            }
-          };
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+            canPreventDefault: true,
+          });
 
-          const onLongPress = () => {
-            navigation.emit({
-              type: "tabLongPress",
-              target: route.key,
-            });
-          };
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name, route.params);
+          }
+        };
 
-          return (
-            <TouchableOpacity
-              key={route.key}
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarButtonTestID}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={[
-                styles.tabbarItems,
-                {
-                  backgroundColor: isFocused
-                    ? Colors.light.text_tertiary
-                    : "#fff",
-                },
-              ]}
-            >
-              {icon[route.name](isFocused)}
-
-              <Text
-                style={{
-                  color: isFocused ? Colors.light.text_primary : "gray",
-                  fontFamily: "GoogleSansFlex-Regular",
-                }}
+        return (
+          <AnimatedTouchableOpacity
+            layout={LinearTransition.springify().mass(0.5)}
+            key={route.key}
+            onPress={onPress}
+            style={[
+              styles.tabItem,
+              { backgroundColor: isFocused ? ACTIVE_COLOR : "transparent" },
+            ]}
+          >
+            {getIconByRouteName(
+              route.name,
+              isFocused ? Colors.light.text_primary : Colors.light.text_form
+            )}
+            {isFocused && (
+              <Animated.Text
+                entering={FadeInRight.duration(200)}
+                exiting={FadeOutRight.duration(200)}
+                style={styles.text}
               >
-                {typeof label === "function"
-                  ? label({
-                      focused: isFocused,
-                      color: isFocused ? Colors.light.text_tertiary : "gray",
-                      position: "below-icon",
-                      children: route.name,
-                    })
-                  : label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+                {label as string}
+              </Animated.Text>
+            )}
+          </AnimatedTouchableOpacity>
+        );
+      })}
     </View>
   );
-}
+
+  function getIconByRouteName(routeName: string, color: string) {
+    switch (routeName) {
+      case "index":
+        return <Feather name="home" size={18} color={color} />;
+      case "explore":
+        return <AntDesign name="file-text" size={18} color={color} />;
+      case "history":
+        return <Feather name="pie-chart" size={18} color={color} />;
+      case "settings":
+        return <Ionicons name="wallet-outline" size={18} color={color} />;
+      case "profile":
+        return <FontAwesome6 name="circle-user" size={18} color={color} />;
+      default:
+        return <Feather name="home" size={18} color={color} />;
+    }
+  }
+};
 
 const styles = StyleSheet.create({
-  tabbar: {
+  container: {
     position: "absolute",
-    bottom: 20,
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
-    padding: 10,
-    borderRadius: 20,
-  },
-  tabbarButtons: {
-    backgroundColor: "#fff",
-    gap: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 40,
-  },
-  tabbarItems: {
-    flexDirection: "column",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: PRIMARY_COLOR,
+    width: "80%",
+    alignSelf: "center",
+    bottom: 10,
     borderRadius: 50,
-    gap: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  tabItem: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 60,
+    paddingHorizontal: 20,
+    paddingVertical: 0,
+    borderRadius: 50,
+    gap: 10,
+  },
+  text: {
+    color: Colors.light.text_primary,
+    marginLeft: 8,
+    fontWeight: "500",
   },
 });
+
+export default NavBar;

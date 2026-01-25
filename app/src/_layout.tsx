@@ -9,11 +9,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import "../../global.css";
 
 
+import Loading from "../../components/loading";
 import TabsLayout from "./TabsLayout";
 import Welcome from "./auth/index";
 import Login from "./auth/login";
 import Register from "./auth/register";
-import Loading from "./screens/loading";
+import Details from "./screens/details";
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
@@ -59,6 +60,11 @@ export const Layout = () => {
           <Stack.Screen
             name="Tabs"
             component={TabsLayout}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Details"
+            component={Details}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

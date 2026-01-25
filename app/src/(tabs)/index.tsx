@@ -1,19 +1,22 @@
+import { Colors } from "@/constants/theme";
 import fetchData from "@/hooks/fetchData";
 import { Entypo } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   FlatList,
   ImageBackground,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 // url: "https://westmountflorist.com/cdn/shop/articles/freya-ingva-6P9JgFe3f9Q-unsplash.jpg",
-const flowers = [
+const mock_data = [
   {
     name: "daisy",
     scientificName: "Bellis perennis",
@@ -33,31 +36,31 @@ const flowers = [
     date: "September 8",
   },
 ];
-export default function Home() {
+export default function Home({navigation}: {navigation: any}) {
   const [camera, setCamera] = useState(false);
   const [location, setLocation] = useState("");
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const { data, isLoading } = useQuery({
+  const { data:flowers, isLoading } = useQuery({
     queryKey: ["data"],
     queryFn: async () => {
       return await fetchData();
     },
   });
-  console.log(data);
+  console.log(flowers);
   return (
     <ScrollView
+      style={{ flex: 1, backgroundColor: "#f1f1f1" }}
       contentContainerStyle={{
         padding: 10,
-        flex: 1,
+        paddingBottom: 40,
         gap: 16,
-        backgroundColor: "#f1f1f1",
       }}
     >
       <StatusBar
         translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
+        backgroundColor="rgba(0,0,0,1)"
+        barStyle="dark-content"
       />
       <View
         style={{
@@ -116,9 +119,9 @@ export default function Home() {
           <Text className="text-green-500 underline">See All</Text>
         </View>
         <View className="mt-2">
-          {flowers && (
+          {mock_data && (
             <FlatList
-              data={flowers}
+              data={mock_data}
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               horizontal
@@ -154,7 +157,7 @@ export default function Home() {
                         elevation: 5,
                       }}
                     >
-                      {flowers.map((_, i) => (
+                      {mock_data.map((_, i) => (
                         <Entypo
                           key={i}
                           name="dot-single"
@@ -169,6 +172,53 @@ export default function Home() {
             />
           )}
         </View>
+        <View style={{ flex: 1, marginTop: 10 }}>
+          <Text style={ {fontSize: 20, fontFamily: "GoogleSansFlex-Black"}}>Total Plants Found : {flowers?.length}</Text>
+          <FlatList 
+            data={flowers}
+            numColumns={2}
+            keyExtractor={(item) => item.id?.toString()}
+            scrollEnabled={false}
+            columnWrapperStyle={{ gap: 10 }}
+            renderItem={({ item }) => {
+              // console.log("Rendering plant item:", item);
+              return (
+                <Animated.View 
+                  entering={FadeInDown.delay(100)}
+                  style={styles.imageCard}
+                >
+                  <Pressable 
+                     style={({ pressed }) => ({
+                      flex: 1,
+                      opacity: pressed ? 0.8 : 1
+                    })}
+                    onPress={() => navigation.navigate("Details", { 
+                      name: item.scientific_name,
+                      ...item 
+                    })}
+                  >
+                    <Animated.Image 
+                      // @ts-ignore
+                      sharedTransitionTag={`image-${item.id}`}
+                      source={item.image_url ? { uri: item.image_url } : require("@/assets/images/Bauhinia_purpurea_L.jpg")} 
+                      style={styles.image} 
+                      resizeMode="cover"
+                    />
+                    <View style={styles.textContainer}>
+                       <Text style={styles.family} numberOfLines={2}>
+                        {item.family}
+                      </Text>
+                      <Text style={styles.scientificName} numberOfLines={2}>
+                        {item.scientific_name}
+                      </Text>
+                      
+                    </View>
+                  </Pressable>
+                </Animated.View>
+              );
+            }} 
+          />
+        </View>
       </View>
     </ScrollView>
   );
@@ -176,33 +226,33 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   list: {},
+  imageCard: {
+    flex: 1,
+    height: 240,
+    marginBottom: 20,
+    borderRadius: 15,
+    overflow: "hidden",
+    backgroundColor: Colors.light.text_tertiary,
+  },
+  image: {
+    width: "100%",
+    height: 160,
+  },
+  textContainer: {
+    padding: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scientificName: {
+    fontSize: 12,
+    fontFamily: "GoogleSansFlex-Bold",
+    textAlign: "center",
+    color: Colors.light.text_secondary,
+  },
+  family: {
+    fontSize: 12,
+    fontFamily: "GoogleSansFlex-Bold",
+    textAlign: "center",
+    color: Colors.light.text_primary,
+  },
 });
-
-// {
-//   data?.map((pokemon: Pokemon) => (
-//     <Link
-//       key={pokemon.name}
-//       href={{ pathname: "/src/details", params: { name: pokemon.name } }}
-//       style={{
-//         flexDirection: "column",
-//         alignItems: "center",
-//         justifyContent: "center",
-//         //@ts-ignore
-//         backgroundColor: colorsByType[pokemon.type[0].type.name] + 50,
-//         borderRadius: 16,
-//         padding: 20,
-//       }}
-//     >
-//       <View style={{ flexDirection: "column", alignItems: "center" }}>
-//         <Text style={{ fontSize: 20 }}>{pokemon.name}</Text>
-//         <Text style={{ fontSize: 20, color: "gray" }}>
-//           {pokemon.type[0].type.name}
-//         </Text>
-//         <View style={{ flexDirection: "row", alignItems: "center" }}>
-//           <Image source={{ uri: pokemon.image, width: 150, height: 150 }} />
-//           <Image source={{ uri: pokemon.imageBack, width: 150, height: 150 }} />
-//         </View>
-//       </View>
-//     </Link>
-//   ));
-// }

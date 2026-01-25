@@ -1,4 +1,4 @@
-import { TabBar } from "@/components/TabBar";
+import TabBar from "@/components/TabBar";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 // Import your screens
