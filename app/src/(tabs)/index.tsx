@@ -1,9 +1,11 @@
 import { Colors } from "@/constants/theme";
 import fetchData from "@/hooks/fetchData";
-import { Entypo } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  Dimensions,
   FlatList,
   ImageBackground,
   Pressable,
@@ -13,9 +15,82 @@ import {
   Text,
   View,
 } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, {
+  FadeInDown,
+  FadeInRight,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
-// url: "https://westmountflorist.com/cdn/shop/articles/freya-ingva-6P9JgFe3f9Q-unsplash.jpg",
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_WIDTH = SCREEN_WIDTH - 40;
+
+// Plant Card Component
+interface PlantCardProps {
+  item: any;
+  index: number;
+  onPress: (item: any) => void;
+}
+
+const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View 
+      entering={FadeInDown.delay(500 + index * 50).duration(600)}
+      style={[styles.imageCard, animatedStyle]}
+    >
+      <Pressable 
+        onPressIn={() => {
+          scale.value = withSpring(0.95);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1);
+        }}
+        onPress={() => onPress(item)}
+        style={styles.cardPressable}
+      >
+        <View style={styles.imageContainer}>
+          <Animated.Image 
+            // @ts-ignore
+            sharedTransitionTag={`image-${item.id}`}
+            source={item.image_url ? { uri: item.image_url } : require("@/assets/images/Bauhinia_purpurea_L.jpg")} 
+            style={styles.image} 
+            resizeMode="cover"
+          />
+          <View style={styles.imageOverlay}>
+            <View style={styles.favoriteButton}>
+              <Ionicons name="heart-outline" size={18} color="#fff" />
+            </View>
+          </View>
+        </View>
+        <View style={styles.textContainer}>
+          <View style={styles.familyBadge}>
+            <Text style={styles.family} numberOfLines={1}>
+              {item.family || "Unknown"}
+            </Text>
+          </View>
+          <Text style={styles.scientificName} numberOfLines={2}>
+            {item.scientific_name}
+          </Text>
+          <View style={styles.cardFooter}>
+            <Ionicons name="leaf-outline" size={14} color={Colors.light.text_tertiary} />
+            <Text style={styles.cardFooterText}>Plant</Text>
+          </View>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+});
+
+PlantCard.displayName = "PlantCard";
+
 const mock_data = [
   {
     name: "daisy",
@@ -36,223 +111,417 @@ const mock_data = [
     date: "September 8",
   },
 ];
+
 export default function Home({navigation}: {navigation: any}) {
-  const [camera, setCamera] = useState(false);
-  const [location, setLocation] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
+  const [location] = useState("");
+  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
+  const carouselRef = useRef<FlatList>(null);
+  
   const { data:flowers, isLoading } = useQuery({
     queryKey: ["data"],
     queryFn: async () => {
       return await fetchData();
     },
   });
-  console.log(flowers);
+
+  const handlePlantPress = (item: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Details", { 
+      name: item.scientific_name,
+      ...item 
+    });
+  };
+
+  const onCarouselScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / CARD_WIDTH);
+    setCurrentCarouselIndex(index);
+  };
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: "#f1f1f1" }}
-      contentContainerStyle={{
-        padding: 10,
-        paddingBottom: 40,
-        gap: 16,
-      }}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
       <StatusBar
         translucent
-        backgroundColor="rgba(0,0,0,1)"
+        backgroundColor="transparent"
         barStyle="dark-content"
       />
-      <View
-        style={{
-          flexDirection: "row-reverse",
-          alignItems: "center",
-          justifyContent: "space-between",
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingTop: 60,
+          paddingBottom: 40,
+          gap: 24,
         }}
+        showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 16,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+        {/* Enhanced Header */}
+        <Animated.View 
+          entering={FadeInDown.delay(100).duration(600)}
+          style={styles.headerContainer}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              backgroundColor: "black",
-              borderRadius: 100,
-            }}
-          >
-            <Entypo name="cloud" size={24} color="white" />
-            <Text
-              style={{
-                fontSize: 10,
-                color: "#f1f1f1",
-                fontFamily: "GoogleSansFlex-Regular",
-                textTransform: "capitalize",
-              }}
+          <View style={styles.headerContent}>
+            <View>
+              <Text style={styles.greeting}>Hello! 👋</Text>
+              <Text style={styles.appTitle}>Mya Khwar Nyo</Text>
+            </View>
+            <Pressable
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              style={styles.locationButton}
             >
-              {location ? location : "Tap to set location"}
-            </Text>
+              <View style={styles.locationButtonInner}>
+                <Ionicons name="location" size={18} color="#4caf50" />
+                <Text style={styles.locationText}>
+                  {location ? location : "Set location"}
+                </Text>
+              </View>
+            </Pressable>
           </View>
-        </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-          <Text
-            style={{
-              fontSize: 20,
-              fontFamily: "GoogleSansFlex-Black",
-            }}
-          >
-            Mya Khwar Nyo
-          </Text>
-        </View>
-      </View>
+        </Animated.View>
 
-      <View className="mt-4">
-        <View className="flex-row justify-between">
-          <Text>Recent Scans</Text>
-          <Text className="text-green-500 underline">See All</Text>
-        </View>
-        <View className="mt-2">
-          {mock_data && (
+        {/* Enhanced Recent Scans Carousel */}
+        <Animated.View entering={FadeInUp.delay(200).duration(600)}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Recent Scans</Text>
+              <Text style={styles.sectionSubtitle}>Your plant discoveries</Text>
+            </View>
+            <Pressable
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+            >
+              <Text style={styles.seeAllText}>See All →</Text>
+            </Pressable>
+          </View>
+          
+          <View style={styles.carouselContainer}>
             <FlatList
+              ref={carouselRef}
               data={mock_data}
+              horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              horizontal
+              onScroll={onCarouselScroll}
+              scrollEventThrottle={16}
+              snapToInterval={CARD_WIDTH + 20}
+              decelerationRate="fast"
+              contentContainerStyle={{ paddingRight: 20 }}
               renderItem={({ item, index }) => (
-                <View>
+                <Animated.View
+                  entering={FadeInRight.delay(300 + index * 100).duration(600)}
+                  style={[styles.carouselCard, { width: CARD_WIDTH }]}
+                >
                   <ImageBackground
                     source={{ uri: item.url }}
                     resizeMode="cover"
-                    style={{ width: 400, height: 200, position: "relative" }}
-                  />
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      position: "absolute",
-                      bottom: 10,
-                      left: 0,
-                      right: 0,
-                      justifyContent: "center",
-                    }}
+                    style={styles.carouselImage}
+                    imageStyle={styles.carouselImageStyle}
                   >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginHorizontal: 5,
-                        padding: 0.2,
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
-                        borderRadius: 100,
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowColor: "black",
-                        shadowOpacity: 0.25,
-                        shadowRadius: 3.84,
-                        elevation: 5,
-                      }}
-                    >
-                      {mock_data.map((_, i) => (
-                        <Entypo
-                          key={i}
-                          name="dot-single"
-                          size={24}
-                          color={i === index ? "white" : "gray"}
-                        />
-                      ))}
+                    <View style={styles.carouselGradient}>
+                      <View style={styles.carouselContent}>
+                        <View style={styles.carouselBadge}>
+                          <Ionicons name="camera" size={14} color="#fff" />
+                          <Text style={styles.carouselBadgeText}>Scanned</Text>
+                        </View>
+                        <View style={styles.carouselTextContainer}>
+                          <Text style={styles.carouselName}>{item.name}</Text>
+                          <Text style={styles.carouselScientificName}>
+                            {item.scientificName}
+                          </Text>
+                          <View style={styles.carouselDateContainer}>
+                            <Ionicons name="time-outline" size={14} color="#fff" />
+                            <Text style={styles.carouselDate}>{item.date}</Text>
+                          </View>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                </View>
+                  </ImageBackground>
+                </Animated.View>
               )}
             />
+            {/* Enhanced Indicators */}
+            <View style={styles.indicatorsContainer}>
+              {mock_data.map((_, i) => (
+                <Animated.View
+                  key={i}
+                  style={[
+                    styles.indicator,
+                    currentCarouselIndex === i && styles.indicatorActive,
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+        </Animated.View>
+        {/* Enhanced Plant Grid */}
+        <Animated.View entering={FadeInUp.delay(400).duration(600)}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Plant Collection</Text>
+              <Text style={styles.sectionSubtitle}>
+                {flowers?.length || 0} plants discovered
+              </Text>
+            </View>
+          </View>
+          
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Loading plants...</Text>
+            </View>
+          ) : (
+            <FlatList 
+              data={flowers}
+              numColumns={2}
+              keyExtractor={(item) => item.id?.toString()}
+              scrollEnabled={false}
+              columnWrapperStyle={{ gap: 12 }}
+              contentContainerStyle={{ gap: 12 }}
+              renderItem={({ item, index }) => (
+                <PlantCard 
+                  item={item} 
+                  index={index} 
+                  onPress={handlePlantPress}
+                />
+              )} 
+            />
           )}
-        </View>
-        <View style={{ flex: 1, marginTop: 10 }}>
-          <Text style={ {fontSize: 20, fontFamily: "GoogleSansFlex-Black"}}>Total Plants Found : {flowers?.length}</Text>
-          <FlatList 
-            data={flowers}
-            numColumns={2}
-            keyExtractor={(item) => item.id?.toString()}
-            scrollEnabled={false}
-            columnWrapperStyle={{ gap: 10 }}
-            renderItem={({ item }) => {
-              // console.log("Rendering plant item:", item);
-              return (
-                <Animated.View 
-                  entering={FadeInDown.delay(100)}
-                  style={styles.imageCard}
-                >
-                  <Pressable 
-                     style={({ pressed }) => ({
-                      flex: 1,
-                      opacity: pressed ? 0.8 : 1
-                    })}
-                    onPress={() => navigation.navigate("Details", { 
-                      name: item.scientific_name,
-                      ...item 
-                    })}
-                  >
-                    <Animated.Image 
-                      // @ts-ignore
-                      sharedTransitionTag={`image-${item.id}`}
-                      source={item.image_url ? { uri: item.image_url } : require("@/assets/images/Bauhinia_purpurea_L.jpg")} 
-                      style={styles.image} 
-                      resizeMode="cover"
-                    />
-                    <View style={styles.textContainer}>
-                       <Text style={styles.family} numberOfLines={2}>
-                        {item.family}
-                      </Text>
-                      <Text style={styles.scientificName} numberOfLines={2}>
-                        {item.scientific_name}
-                      </Text>
-                      
-                    </View>
-                  </Pressable>
-                </Animated.View>
-              );
-            }} 
-          />
-        </View>
-      </View>
-    </ScrollView>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  list: {},
+  headerContainer: {
+    marginBottom: 8,
+  },
+  headerContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  greeting: {
+    fontSize: 16,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: Colors.light.text_secondary,
+    marginBottom: 4,
+  },
+  appTitle: {
+    fontSize: 32,
+    fontFamily: "GoogleSansFlex-Black",
+    color: Colors.light.text_primary,
+    letterSpacing: -0.5,
+  },
+  locationButton: {
+    marginTop: 4,
+  },
+  locationButtonInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  locationText: {
+    fontSize: 12,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: Colors.light.text_primary,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: "GoogleSansFlex-Black",
+    color: Colors.light.text_primary,
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: Colors.light.text_secondary,
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontFamily: "GoogleSansFlex-Bold",
+    color: "#4caf50",
+  },
+  carouselContainer: {
+    marginTop: 8,
+  },
+  carouselCard: {
+    marginRight: 20,
+    borderRadius: 24,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  carouselImage: {
+    width: "100%",
+    height: 220,
+    justifyContent: "flex-end",
+  },
+  carouselImageStyle: {
+    borderRadius: 24,
+  },
+  carouselGradient: {
+    backgroundColor: "rgba(0,0,0,0.4)",
+    padding: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  carouselContent: {
+    gap: 12,
+  },
+  carouselBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(76, 175, 80, 0.9)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  carouselBadgeText: {
+    fontSize: 11,
+    fontFamily: "GoogleSansFlex-Bold",
+    color: "#fff",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  carouselTextContainer: {
+    gap: 4,
+  },
+  carouselName: {
+    fontSize: 24,
+    fontFamily: "GoogleSansFlex-Black",
+    color: "#fff",
+    textTransform: "capitalize",
+  },
+  carouselScientificName: {
+    fontSize: 14,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: "rgba(255,255,255,0.9)",
+    fontStyle: "italic",
+  },
+  carouselDateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 8,
+  },
+  carouselDate: {
+    fontSize: 12,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: "rgba(255,255,255,0.8)",
+  },
+  indicatorsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 16,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ddd",
+  },
+  indicatorActive: {
+    width: 24,
+    backgroundColor: "#4caf50",
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: Colors.light.text_secondary,
+  },
   imageCard: {
     flex: 1,
-    height: 240,
-    marginBottom: 20,
-    borderRadius: 15,
+    borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: Colors.light.text_tertiary,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cardPressable: {
+    flex: 1,
+  },
+  imageContainer: {
+    position: "relative",
+    width: "100%",
+    height: 180,
   },
   image: {
     width: "100%",
-    height: 160,
+    height: "100%",
+  },
+  imageOverlay: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+  },
+  favoriteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   textContainer: {
-    padding: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 14,
+    gap: 8,
   },
-  scientificName: {
-    fontSize: 12,
-    fontFamily: "GoogleSansFlex-Bold",
-    textAlign: "center",
-    color: Colors.light.text_secondary,
+  familyBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: Colors.light.bg_secondary + "20",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   family: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "GoogleSansFlex-Bold",
-    textAlign: "center",
+    color: Colors.light.text_tertiary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  scientificName: {
+    fontSize: 14,
+    fontFamily: "GoogleSansFlex-Bold",
     color: Colors.light.text_primary,
+    lineHeight: 20,
+  },
+  cardFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 4,
+  },
+  cardFooterText: {
+    fontSize: 11,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: Colors.light.text_secondary,
   },
 });

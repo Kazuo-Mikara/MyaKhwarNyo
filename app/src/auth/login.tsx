@@ -4,16 +4,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
-    Alert,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const Login = ({}: any) => {
@@ -38,6 +38,9 @@ const Login = ({}: any) => {
       })
       if (error) {
         Alert.alert("Error", error.message);
+      }
+      else {
+        navigation.navigate("Home");
       }
     }
       
@@ -299,7 +302,7 @@ const Login = ({}: any) => {
                   color: "gray",
                 }}        
               >
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate("Register")}>
                 <Text
