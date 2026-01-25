@@ -21,7 +21,7 @@ export default function Details({navigation}: {navigation: any}) {
   
   const params = (Object.keys(localParams).length > 0 ? localParams : (route.params || {})) as any;
   
-  console.log("Details Params:", params);
+  // console.log("Details Params:", params);
 
   const { name, scientific_name, common_name, image_url, id, family, description } = params;
   const displayName = name || common_name || scientific_name || "Plant Details";

@@ -1,8 +1,8 @@
 import { Colors } from "@/constants/theme";
 import fetchData from "@/hooks/fetchData";
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
@@ -149,7 +149,7 @@ export default function Home({navigation}: {navigation: any}) {
         contentContainerStyle={{
           padding: 20,
           paddingTop: 60,
-          paddingBottom: 40,
+          paddingBottom: 120,
           gap: 24,
         }}
         showsVerticalScrollIndicator={false}
@@ -285,11 +285,60 @@ export default function Home({navigation}: {navigation: any}) {
           )}
         </Animated.View>
       </ScrollView>
+
+      {/* Floating Scan Button */}
+      <Animated.View 
+        entering={FadeInUp.delay(800).duration(600)}
+        style={styles.scanButtonContainer}
+      >
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate("explore");
+          }}
+          style={({ pressed }) => [
+            styles.scanButton,
+            pressed && styles.scanButtonPressed,
+          ]}
+        >
+          <Ionicons name="scan-outline" size={24} color="#fff" />
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  scanButtonContainer: {
+    position: "absolute",
+    bottom: 120,
+    right: 20,
+    zIndex: 100,
+    backgroundColor: "#4caf50",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderRadius: 30,
+    gap: 10,
+    shadowColor: "#4caf50",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  scanButton: {
+    flexDirection: "row",
+    alignItems: "center",
+
+  },
+  scanButtonPressed: {
+    transform: [{ scale: 0.95 }],
+    opacity: 0.9,
+  },
+  scanButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "GoogleSansFlex-Bold",
+  },
   headerContainer: {
     marginBottom: 8,
   },

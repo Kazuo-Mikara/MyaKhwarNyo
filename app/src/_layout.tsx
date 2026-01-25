@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import AuthProvider from "@/context/AuthProvider";
+import ThemeProvider from "@/context/ThemeContext";
 import QueryProvider from "@/providers/QueryProvider";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
@@ -41,17 +42,19 @@ export default function RootLayout() {
   }, [loaded, error]);
   if (!loaded && error) return null;
   return (
-    <AuthProvider>
-      <QueryProvider>
-        <Layout></Layout>
-      </QueryProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <QueryProvider>
+          <Layout></Layout>
+        </QueryProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
 export const Layout = () => {
   const { isLoggedIn, isLoading } = useAuth();
-  console.log('isLoggedIn:', isLoggedIn);
+  // console.log('isLoggedIn:', isLoggedIn);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isLoading && <Stack.Screen name="Loading" component={Loading} />}
