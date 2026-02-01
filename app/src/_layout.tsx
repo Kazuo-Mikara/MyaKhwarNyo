@@ -4,6 +4,7 @@ import ThemeProvider from "@/context/ThemeContext";
 import QueryProvider from "@/providers/QueryProvider";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
+import Scan from "./screens/scan";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -68,6 +69,11 @@ export const Layout = () => {
           <Stack.Screen
             name="Details"
             component={Details}
+            options={{ headerShown: false }}
+          />
+           <Stack.Screen
+            name="Scan"
+            component={Scan}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

@@ -14,7 +14,7 @@ import Animated, {
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-const PRIMARY_COLOR = Colors.light.text_tertiary;
+const PRIMARY_COLOR = Colors.light.bg_primary;
 const SECONDARY_COLOR = Colors.light.text_secondary;
 const ACTIVE_COLOR = Colors.light.input_bg;
 const NavBar: React.FC<BottomTabBarProps> = ({

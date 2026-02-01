@@ -10,7 +10,7 @@ export default function TabLayout() {
           title: "Home",
           headerShown: false,
         }}
-      />
+/>
       <Tabs.Screen
         name="explore"
         options={{

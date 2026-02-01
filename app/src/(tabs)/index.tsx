@@ -2,6 +2,7 @@ import { Colors } from "@/constants/theme";
 import fetchData from "@/hooks/fetchData";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import React, { useRef, useState } from "react";
 import {
@@ -27,6 +28,13 @@ import Animated, {
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 40;
 
+const imageSharedTransition =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (Animated as any).SharedTransition
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((Animated as any).SharedTransition as any).duration(550).springify()
+    : undefined;
+
 // Plant Card Component
 interface PlantCardProps {
   item: any;
@@ -41,11 +49,11 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
   }));
 
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeInDown.delay(500 + index * 50).duration(600)}
       style={[styles.imageCard, animatedStyle]}
     >
-      <Pressable 
+      <Pressable
         onPressIn={() => {
           scale.value = withSpring(0.95);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -57,11 +65,16 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
         style={styles.cardPressable}
       >
         <View style={styles.imageContainer}>
-          <Animated.Image 
+          <Animated.Image
             // @ts-ignore
             sharedTransitionTag={`image-${item.id}`}
-            source={item.image_url ? { uri: item.image_url } : require("@/assets/images/Bauhinia_purpurea_L.jpg")} 
-            style={styles.image} 
+            sharedTransitionStyle={imageSharedTransition}
+            source={
+              item.image_url
+                ? { uri: item.image_url }
+                : require("@/assets/images/Bauhinia_purpurea_L.jpg")
+            }
+            style={styles.image}
             resizeMode="cover"
           />
           <View style={styles.imageOverlay}>
@@ -76,11 +89,18 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
               {item.family || "Unknown"}
             </Text>
           </View>
+          <Text style={styles.myanmarName} numberOfLines={2}>
+            {item.myanmar_name}
+          </Text>
           <Text style={styles.scientificName} numberOfLines={2}>
             {item.scientific_name}
           </Text>
           <View style={styles.cardFooter}>
-            <Ionicons name="leaf-outline" size={14} color={Colors.light.text_tertiary} />
+            <Ionicons
+              name="leaf-outline"
+              size={14}
+              color={Colors.light.text_tertiary}
+            />
             <Text style={styles.cardFooterText}>Plant</Text>
           </View>
         </View>
@@ -112,23 +132,37 @@ const mock_data = [
   },
 ];
 
-export default function Home({navigation}: {navigation: any}) {
-  const [location] = useState("");
+export default function Home({ navigation }: { navigation: any }) {
+  const [permission, requestPermission] = useCameraPermissions();
+  const [userLocation] = useState("");
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const carouselRef = useRef<FlatList>(null);
-  
-  const { data:flowers, isLoading } = useQuery({
+
+  const { data: flowers, isLoading } = useQuery({
     queryKey: ["data"],
     queryFn: async () => {
-      return await fetchData();
+      return await fetchData({ items: 3, orderBy: "scientific_name" });
     },
   });
 
+  const handleCameraPress = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        alert("Camera permission is required to scan plants.");
+        return;
+      }
+    }
+    // Proceed with scanning
+    navigation.navigate("Scan");
+  };
+
   const handlePlantPress = (item: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Details", { 
+    navigation.navigate("Details", {
       name: item.scientific_name,
-      ...item 
+      ...item,
     });
   };
 
@@ -149,13 +183,13 @@ export default function Home({navigation}: {navigation: any}) {
         contentContainerStyle={{
           padding: 20,
           paddingTop: 60,
-          paddingBottom: 120,
+          paddingBottom: 10,
           gap: 24,
         }}
         showsVerticalScrollIndicator={false}
       >
         {/* Enhanced Header */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.delay(100).duration(600)}
           style={styles.headerContainer}
         >
@@ -165,13 +199,15 @@ export default function Home({navigation}: {navigation: any}) {
               <Text style={styles.appTitle}>Mya Khwar Nyo</Text>
             </View>
             <Pressable
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              onPress={() =>
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+              }
               style={styles.locationButton}
             >
               <View style={styles.locationButtonInner}>
                 <Ionicons name="location" size={18} color="#4caf50" />
                 <Text style={styles.locationText}>
-                  {location ? location : "Set location"}
+                  {userLocation ? userLocation : "Set location"}
                 </Text>
               </View>
             </Pressable>
@@ -186,12 +222,14 @@ export default function Home({navigation}: {navigation: any}) {
               <Text style={styles.sectionSubtitle}>Your plant discoveries</Text>
             </View>
             <Pressable
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              onPress={() =>
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+              }
             >
               <Text style={styles.seeAllText}>See All →</Text>
             </Pressable>
           </View>
-          
+
           <View style={styles.carouselContainer}>
             <FlatList
               ref={carouselRef}
@@ -227,7 +265,11 @@ export default function Home({navigation}: {navigation: any}) {
                             {item.scientificName}
                           </Text>
                           <View style={styles.carouselDateContainer}>
-                            <Ionicons name="time-outline" size={14} color="#fff" />
+                            <Ionicons
+                              name="time-outline"
+                              size={14}
+                              color="#fff"
+                            />
                             <Text style={styles.carouselDate}>{item.date}</Text>
                           </View>
                         </View>
@@ -257,45 +299,42 @@ export default function Home({navigation}: {navigation: any}) {
             <View>
               <Text style={styles.sectionTitle}>Plant Collection</Text>
               <Text style={styles.sectionSubtitle}>
-                {flowers?.length || 0} plants discovered
+                {flowers?.length || 0} plants for you to explore
               </Text>
             </View>
           </View>
-          
+
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>Loading plants...</Text>
             </View>
           ) : (
-            <FlatList 
+            <FlatList
               data={flowers}
               numColumns={2}
               keyExtractor={(item) => item.id?.toString()}
               scrollEnabled={false}
               columnWrapperStyle={{ gap: 12 }}
-              contentContainerStyle={{ gap: 12 }}
+              contentContainerStyle={{ gap: 12, marginBottom: 100 }}
               renderItem={({ item, index }) => (
-                <PlantCard 
-                  item={item} 
-                  index={index} 
+                <PlantCard
+                  item={item}
+                  index={index}
                   onPress={handlePlantPress}
                 />
-              )} 
+              )}
             />
           )}
         </Animated.View>
       </ScrollView>
 
       {/* Floating Scan Button */}
-      <Animated.View 
+      <Animated.View
         entering={FadeInUp.delay(800).duration(600)}
         style={styles.scanButtonContainer}
       >
         <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate("explore");
-          }}
+          onPress={handleCameraPress}
           style={({ pressed }) => [
             styles.scanButton,
             pressed && styles.scanButtonPressed,
@@ -328,7 +367,6 @@ const styles = StyleSheet.create({
   scanButton: {
     flexDirection: "row",
     alignItems: "center",
-
   },
   scanButtonPressed: {
     transform: [{ scale: 0.95 }],
@@ -544,7 +582,7 @@ const styles = StyleSheet.create({
   },
   familyBadge: {
     alignSelf: "flex-start",
-    backgroundColor: Colors.light.bg_secondary + "20",
+    backgroundColor: Colors.light.bg_secondary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -552,14 +590,21 @@ const styles = StyleSheet.create({
   family: {
     fontSize: 10,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_tertiary,
+    color: Colors.light.text_secondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  scientificName: {
+  myanmarName: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
     color: Colors.light.text_primary,
+    lineHeight: 20,
+  },
+  scientificName: {
+    fontSize: 12,
+    fontFamily: "GoogleSansFlex-Regular",
+    fontStyle: "italic",
+    color: Colors.light.text_secondary,
     lineHeight: 20,
   },
   cardFooter: {

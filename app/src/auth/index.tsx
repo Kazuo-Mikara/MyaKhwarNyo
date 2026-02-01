@@ -73,7 +73,7 @@ const Welcome = ({ navigation }: any) => {
           >
             <Text style={styles.welcomeTitle}>Welcome</Text>
             <Text style={styles.welcomeSubtitle}>
-              Discover the beauty of nature through plant identification
+              Discover the beauty of nature 
             </Text>
             <View style={styles.featureList}>
               <View style={styles.featureItem}>
@@ -225,23 +225,24 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   featureList: {
-    gap: 16,
+    flexDirection: "row",
+    gap: 10,
     width: "100%",
   },
   featureItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
     backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
   featureText: {
     fontFamily: "GoogleSansFlex-Regular",
-    fontSize: 15,
+    fontSize: 10,
     color: Colors.light.text_overpic,
   },
   buttonContainer: {
