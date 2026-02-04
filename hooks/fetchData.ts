@@ -22,4 +22,17 @@ const fetchData = async ({
     return [];
   }
 };
+
+export const fetchFlowerById = async (id: string) => {
+  try {
+    const { data, error } = await flowers.select("*").eq("id", id).single();
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error("Fetch Flower By Id Error:", error);
+    return null;
+  }
+};
 export default fetchData;

@@ -1,9 +1,11 @@
 import { Colors } from "@/constants/theme";
+import { useFavoriteFlowers } from "@/hooks/handleFavoriteFlowers";
+import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, {
   FadeIn,
@@ -22,11 +24,15 @@ const imageSharedTransition =
     : undefined;
 
 export default function Details({ navigation }: { navigation: any }) {
+  const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
   const localParams = useLocalSearchParams();
   const route = useRoute();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-
+  const { addFavoriteFlower, removeFromFavorite, getFavoriteFlowers } =
+    useFavoriteFlowers();
+  const { addSavedFlower, removeFromSavedFlower, getSavedFlowers } =
+    useSavedFlowers();
   const params = (
     Object.keys(localParams).length > 0 ? localParams : route.params || {}
   ) as any;
@@ -61,20 +67,38 @@ export default function Details({ navigation }: { navigation: any }) {
     transform: [{ scale: shareScale.value }],
   }));
 
-  const handleFavorite = () => {
+  const handleFavorite = async (flowerId: string) => {
     favoriteScale.value = withSpring(0.8, {}, () => {
       favoriteScale.value = withSpring(1);
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    console.log("Favorite clicked");
     setIsFavorite(!isFavorite);
+    await addFavoriteFlower(flowerId);
   };
 
-  const handleBookmark = () => {
+  useEffect(() => {
+    const checkFavorite = async () => {
+      const favorites = await getFavoriteFlowers();
+      setIsFavorite(favorites.some((fav: any) => fav.flower_id === id));
+    };
+    checkFavorite();
+    const checkBookmark = async () => {
+      const bookmarks = await getSavedFlowers();
+      setIsBookmarked(
+        bookmarks.some((bookmark: any) => bookmark.flower_id === id),
+      );
+    };
+    checkBookmark();
+  }, [id]);
+
+  const handleBookmark = async (flowerId: string) => {
     bookmarkScale.value = withSpring(0.8, {}, () => {
       bookmarkScale.value = withSpring(1);
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsBookmarked(!isBookmarked);
+    await addSavedFlower(flowerId);
   };
 
   const handleShare = () => {
@@ -99,7 +123,7 @@ export default function Details({ navigation }: { navigation: any }) {
             entering={FadeIn.delay(100)}
             source={
               image_url
-                ? { uri: image_url as string }
+                ? { uri: (supabase_s3 + image_url) as string }
                 : require("@/assets/images/Bauhinia_purpurea_L.jpg")
             }
             style={styles.heroImage}
@@ -135,7 +159,10 @@ export default function Details({ navigation }: { navigation: any }) {
                 </Animated.View>
               </Pressable>
 
-              <Pressable onPress={handleBookmark} style={styles.actionButton}>
+              <Pressable
+                onPress={() => handleBookmark(id)}
+                style={styles.actionButton}
+              >
                 <Animated.View
                   style={[styles.actionButtonInner, bookmarkAnimatedStyle]}
                 >
@@ -147,7 +174,10 @@ export default function Details({ navigation }: { navigation: any }) {
                 </Animated.View>
               </Pressable>
 
-              <Pressable onPress={handleFavorite} style={styles.actionButton}>
+              <Pressable
+                onPress={() => handleFavorite(id)}
+                style={styles.actionButton}
+              >
                 <Animated.View
                   style={[styles.actionButtonInner, favoriteAnimatedStyle]}
                 >

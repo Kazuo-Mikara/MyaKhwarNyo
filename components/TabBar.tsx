@@ -3,12 +3,13 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, {
-    FadeInRight,
-    FadeOutRight,
-    LinearTransition
+  FadeInRight,
+  FadeOutRight,
+  LinearTransition,
 } from "react-native-reanimated";
 
 const AnimatedTouchableOpacity =
@@ -32,8 +33,8 @@ const NavBar: React.FC<BottomTabBarProps> = ({
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
-            ? options.title
-            : route.name;
+              ? options.title
+              : route.name;
 
         const isFocused = state.index === index;
 
@@ -61,7 +62,7 @@ const NavBar: React.FC<BottomTabBarProps> = ({
           >
             {getIconByRouteName(
               route.name,
-              isFocused ? Colors.light.text_primary : Colors.light.text_form
+              isFocused ? Colors.light.text_primary : Colors.light.text_form,
             )}
             {isFocused && (
               <Animated.Text
@@ -83,11 +84,17 @@ const NavBar: React.FC<BottomTabBarProps> = ({
       case "index":
         return <Feather name="home" size={18} color={color} />;
       case "explore":
-        return <AntDesign name="file-text" size={18} color={color} />;
+        return <AntDesign name="search" size={18} color={color} />;
       case "history":
-        return <Feather name="pie-chart" size={18} color={color} />;
+        return (
+          <MaterialCommunityIcons
+            name="flower-outline"
+            size={18}
+            color={color}
+          />
+        );
       case "settings":
-        return <Ionicons name="wallet-outline" size={18} color={color} />;
+        return <Ionicons name="settings-outline" size={18} color={color} />;
       case "profile":
         return <FontAwesome6 name="circle-user" size={18} color={color} />;
       default:
@@ -122,7 +129,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 0,
     borderRadius: 50,
-    gap: 10,
+    gap: 1,
   },
   text: {
     color: Colors.light.text_primary,

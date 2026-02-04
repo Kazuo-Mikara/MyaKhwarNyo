@@ -21,27 +21,24 @@ export default function Settings() {
   const { themeMode, setThemeMode } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
-  const userName=session?.user.user_metadata.displayName;
-console.log(session?.user.user_metadata.displayName);
+  const userName = session?.user.user_metadata.displayName;
+  console.log(session?.user.user_metadata.displayName);
+  console.log(session?.user.id);
   const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          await onLogout();
         },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            await onLogout();
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleThemeChange = (mode: "light" | "dark" | "auto") => {
@@ -49,13 +46,13 @@ console.log(session?.user.user_metadata.displayName);
     setThemeMode(mode);
   };
 
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
+  const SettingItem = ({
+    icon,
+    title,
+    subtitle,
+    onPress,
     rightComponent,
-    showArrow = true 
+    showArrow = true,
   }: any) => (
     <Pressable
       onPress={onPress}
@@ -65,23 +62,33 @@ console.log(session?.user.user_metadata.displayName);
       ]}
       onPressIn={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
     >
-      <View style={styles.settingItemContainer} >
-      <View style={styles.settingItemLeft}>
-        <View style={styles.iconWrapper}>
-          <Ionicons name={icon} size={22} color="#4caf50" />
+      <View style={styles.settingItemContainer}>
+        <View style={styles.settingItemLeft}>
+          <View style={styles.iconWrapper}>
+            <Ionicons name={icon} size={22} color="#4caf50" />
+          </View>
+          <View style={styles.settingItemText}>
+            <Text style={styles.settingItemTitle} numberOfLines={1}>
+              {title}
+            </Text>
+            {subtitle && (
+              <Text style={styles.settingItemSubtitle} numberOfLines={1}>
+                {subtitle}
+              </Text>
+            )}
+          </View>
         </View>
-        <View style={styles.settingItemText}>
-          <Text style={styles.settingItemTitle} numberOfLines={1}>{title}</Text>
-          {subtitle && <Text style={styles.settingItemSubtitle} numberOfLines={1}>{subtitle}</Text>}
+        <View style={styles.settingItemRight}>
+          {rightComponent}
+          {showArrow && (
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={Colors.light.text_secondary}
+            />
+          )}
         </View>
       </View>
-      <View style={styles.settingItemRight}>
-        {rightComponent}
-        {showArrow && (
-          <Ionicons name="chevron-forward" size={18} color={Colors.light.text_secondary} />
-        )}
-      </View>
-        </View>
     </Pressable>
   );
 
@@ -94,7 +101,7 @@ console.log(session?.user.user_metadata.displayName);
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.delay(100).duration(600)}
           style={styles.header}
         >
@@ -103,7 +110,7 @@ console.log(session?.user.user_metadata.displayName);
         </Animated.View>
 
         {/* Account Section */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInUp.delay(200).duration(600)}
           style={styles.section}
         >
@@ -114,9 +121,7 @@ console.log(session?.user.user_metadata.displayName);
                 <Ionicons name="person" size={32} color="#4caf50" />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>
-                  {userName || "User"}
-                </Text>
+                <Text style={styles.profileName}>{userName || "User"}</Text>
                 <Text style={styles.profileEmail}>
                   {session?.user?.email || "No email"}
                 </Text>
@@ -146,7 +151,7 @@ console.log(session?.user.user_metadata.displayName);
         </Animated.View>
 
         {/* Appearance Section */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInUp.delay(300).duration(600)}
           style={styles.section}
         >
@@ -162,10 +167,14 @@ console.log(session?.user.user_metadata.displayName);
                     themeMode === "light" && styles.themeOptionActive,
                   ]}
                 >
-                  <Ionicons 
-                    name="sunny" 
-                    size={20} 
-                    color={themeMode === "light" ? "#fff" : Colors.light.text_secondary} 
+                  <Ionicons
+                    name="sunny"
+                    size={20}
+                    color={
+                      themeMode === "light"
+                        ? "#fff"
+                        : Colors.light.text_secondary
+                    }
                   />
                   <Text
                     style={[
@@ -183,10 +192,14 @@ console.log(session?.user.user_metadata.displayName);
                     themeMode === "dark" && styles.themeOptionActive,
                   ]}
                 >
-                  <Ionicons 
-                    name="moon" 
-                    size={20} 
-                    color={themeMode === "dark" ? "#fff" : Colors.light.text_secondary} 
+                  <Ionicons
+                    name="moon"
+                    size={20}
+                    color={
+                      themeMode === "dark"
+                        ? "#fff"
+                        : Colors.light.text_secondary
+                    }
                   />
                   <Text
                     style={[
@@ -204,10 +217,14 @@ console.log(session?.user.user_metadata.displayName);
                     themeMode === "auto" && styles.themeOptionActive,
                   ]}
                 >
-                  <Ionicons 
-                    name="phone-portrait" 
-                    size={20} 
-                    color={themeMode === "auto" ? "#fff" : Colors.light.text_secondary} 
+                  <Ionicons
+                    name="phone-portrait"
+                    size={20}
+                    color={
+                      themeMode === "auto"
+                        ? "#fff"
+                        : Colors.light.text_secondary
+                    }
                   />
                   <Text
                     style={[
@@ -224,7 +241,7 @@ console.log(session?.user.user_metadata.displayName);
         </Animated.View>
 
         {/* Preferences Section */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInUp.delay(400).duration(600)}
           style={styles.section}
         >
@@ -277,7 +294,7 @@ console.log(session?.user.user_metadata.displayName);
         </Animated.View>
 
         {/* About Section */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInUp.delay(500).duration(600)}
           style={styles.section}
         >
@@ -310,22 +327,22 @@ console.log(session?.user.user_metadata.displayName);
         </Animated.View>
 
         {/* Logout Button */}
-        
-          <Pressable
-            onPress={handleLogout}
-            style={({ pressed }) => [
-              styles.logoutButton,
-              pressed && styles.logoutButtonPressed,
-            ]}
+
+        <Pressable
+          onPress={handleLogout}
+          style={({ pressed }) => [
+            styles.logoutButton,
+            pressed && styles.logoutButtonPressed,
+          ]}
         >
-          <Animated.View 
-          entering={FadeInUp.delay(600).duration(600)}
-          style={styles.logoutContainer}
-        >
+          <Animated.View
+            entering={FadeInUp.delay(600).duration(600)}
+            style={styles.logoutContainer}
+          >
             <Ionicons name="log-out-outline" size={20} color="#fff" />
             <Text style={styles.logoutButtonText}>Logout</Text>
-        </Animated.View>
-          </Pressable>
+          </Animated.View>
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -406,7 +423,7 @@ const styles = StyleSheet.create({
     fontFamily: "GoogleSansFlex-Regular",
     color: Colors.light.text_secondary,
   },
-  settingItemContainer:{
+  settingItemContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

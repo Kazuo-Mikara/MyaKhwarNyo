@@ -43,6 +43,7 @@ interface PlantCardProps {
 }
 
 const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
+  const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -71,7 +72,7 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
             sharedTransitionStyle={imageSharedTransition}
             source={
               item.image_url
-                ? { uri: item.image_url }
+                ? { uri: supabase_s3 + item.image_url }
                 : require("@/assets/images/Bauhinia_purpurea_L.jpg")
             }
             style={styles.image}
@@ -117,7 +118,7 @@ export default function Explore({ navigation }: { navigation: any }) {
     });
   };
   const { data: flowers, isLoading } = useQuery({
-    queryKey: ["data"],
+    queryKey: ["explore_flowers"],
     queryFn: async () => {
       return await fetchData({ items: 30, orderBy: "scientific_name" });
     },

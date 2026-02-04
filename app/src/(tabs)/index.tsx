@@ -44,6 +44,7 @@ interface PlantCardProps {
 
 const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
   const scale = useSharedValue(1);
+  const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
@@ -71,7 +72,7 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
             sharedTransitionStyle={imageSharedTransition}
             source={
               item.image_url
-                ? { uri: item.image_url }
+                ? { uri: supabase_s3 + item.image_url }
                 : require("@/assets/images/Bauhinia_purpurea_L.jpg")
             }
             style={styles.image}
@@ -139,7 +140,7 @@ export default function Home({ navigation }: { navigation: any }) {
   const carouselRef = useRef<FlatList>(null);
 
   const { data: flowers, isLoading } = useQuery({
-    queryKey: ["data"],
+    queryKey: ["home_flowers"],
     queryFn: async () => {
       return await fetchData({ items: 3, orderBy: "scientific_name" });
     },
@@ -297,7 +298,7 @@ export default function Home({ navigation }: { navigation: any }) {
         <Animated.View entering={FadeInUp.delay(400).duration(600)}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionTitle}>Plant Collection</Text>
+              <Text style={styles.sectionTitle}>Featured Collections</Text>
               <Text style={styles.sectionSubtitle}>
                 {flowers?.length || 0} plants for you to explore
               </Text>
