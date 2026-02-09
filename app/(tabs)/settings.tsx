@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useNavigation } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -22,7 +23,9 @@ export default function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const userName = session?.user.user_metadata.displayName;
-  console.log(session?.user.user_metadata.displayName);
+  const navigation = useNavigation() as any;
+  console.log(themeMode);
+
   console.log(session?.user.id);
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -139,12 +142,12 @@ export default function Settings() {
             />
 
             <SettingItem
-              icon="shield-checkmark-outline"
-              title="Privacy & Security"
-              subtitle="Manage your privacy settings"
+              icon="language-outline"
+              title="Language"
+              subtitle="Change Language of the app"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                // Navigate to privacy settings
+                navigation.navigate("Language");
               }}
             />
           </View>

@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   },
   familyBadge: {
     alignSelf: "flex-start",
-    backgroundColor: Colors.light.bg_secondary,
+    backgroundColor: Colors.light.bg_primary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,

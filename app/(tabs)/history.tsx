@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { fetchFlowerById } from "@/hooks/fetchData";
 import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
+import useDateFormat from "@/hooks/useDateFormat";
 import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -68,7 +69,7 @@ export default function History() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, queryClient, savedFlowers]);
+  }, [userId, queryClient,  getSavedFlowers]);
 
   const handleRemove = async (flowerId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -146,6 +147,9 @@ export default function History() {
                         Collection Family• {flower.family || "Plant"}
                       </Text>
                     </View>
+                     <Text style={styles.dateText}>
+                        Saved on {useDateFormat(flower.saved_at) || "Date"}
+                      </Text>
                   </View>
                 </View>
 
@@ -252,7 +256,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 20,
     justifyContent: "center",
   },
   flowerName: {
@@ -264,6 +268,7 @@ const styles = StyleSheet.create({
   },
   scientificName: {
     fontSize: 14,
+    fontStyle: "italic",
     fontFamily: "GoogleSansFlex-Regular",
     color: "#65676b",
     marginBottom: 8,
@@ -283,6 +288,12 @@ const styles = StyleSheet.create({
   },
   attributionText: {
     fontSize: 12,
+    fontFamily: "GoogleSansFlex-Regular",
+    color: "#65676b",
+  },
+  dateText: {
+    marginTop: 4,
+    fontSize: 11,
     fontFamily: "GoogleSansFlex-Regular",
     color: "#65676b",
   },

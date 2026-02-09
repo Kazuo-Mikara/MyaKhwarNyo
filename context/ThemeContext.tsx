@@ -20,7 +20,7 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export const useTheme = () => useContext(ThemeContext);
 
-const THEME_STORAGE_KEY = 'theme_mode';
+const THEME_STORAGE_KEY = 'theme';
 
 export default function ThemeProvider({ children }: PropsWithChildren) {
   const systemColorScheme = useColorScheme();

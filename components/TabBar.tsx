@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -15,16 +16,21 @@ import Animated, {
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-const PRIMARY_COLOR = Colors.light.bg_primary;
-const SECONDARY_COLOR = Colors.light.text_secondary;
-const ACTIVE_COLOR = Colors.light.input_bg;
 const NavBar: React.FC<BottomTabBarProps> = ({
   state,
   descriptors,
   navigation,
 }) => {
+  const { theme } = useTheme();
+  const colors = Colors[theme];
+
+  const PRIMARY_COLOR = colors.text_tertiary;
+  const ACTIVE_COLOR = colors.bg_secondary; 
+  const ICON_ACTIVE = theme === 'light' ? colors.text_primary : colors.text_tertiary;
+  const ICON_INACTIVE = theme === 'light' ? colors.text_primary : colors.text_secondary;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: PRIMARY_COLOR }]}>
       {state.routes.map((route, index) => {
         if (["_sitemap", "+not-found"].includes(route.name)) return null;
 
@@ -62,13 +68,13 @@ const NavBar: React.FC<BottomTabBarProps> = ({
           >
             {getIconByRouteName(
               route.name,
-              isFocused ? Colors.light.text_primary : Colors.light.text_form,
+              isFocused ? ICON_ACTIVE : ICON_INACTIVE,
             )}
             {isFocused && (
               <Animated.Text
                 entering={FadeInRight.duration(200)}
                 exiting={FadeOutRight.duration(200)}
-                style={styles.text}
+                style={[styles.text, { color: ICON_ACTIVE }]}
               >
                 {label as string}
               </Animated.Text>
@@ -107,34 +113,33 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     flexDirection: "row",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: PRIMARY_COLOR,
     width: "80%",
     alignSelf: "center",
-    bottom: 10,
+    bottom: 20,
     borderRadius: 50,
     paddingHorizontal: 20,
     paddingVertical: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0,
+    shadowRadius: 10,
+    elevation: 10,
   },
   tabItem: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    height: 60,
-    paddingHorizontal: 20,
-    paddingVertical: 0,
-    borderRadius: 50,
-    gap: 1,
+    height: 45,
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    marginHorizontal: 10,
   },
   text: {
-    color: Colors.light.text_primary,
     marginLeft: 8,
-    fontWeight: "500",
+    fontFamily: "GoogleSansFlex-Bold",
+    fontSize: 12,
   },
 });
 

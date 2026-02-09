@@ -12,11 +12,15 @@ module.exports = {
 
       },
       colors: {
-
+        pastelPink: "#F5B8DB",
+        pastelGreen: "#9AAB63",
+        pastelBlue: "#B6CAEB",
+        pastelYellow: "#F5D867",
+        primary: "#9AAB63",
+        secondary: "#F5D867",
       }
 
     },
   },
   plugins: [],
 }
-

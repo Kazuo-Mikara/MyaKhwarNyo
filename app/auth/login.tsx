@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -17,6 +18,9 @@ import {
 } from "react-native";
 
 const Login = ({}: any) => {
+  const { theme } = useTheme();
+  const colors = Colors[theme];
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -49,11 +53,11 @@ const Login = ({}: any) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1, backgroundColor: Colors.light.text_tertiary }}
+      style={{ flex: 1, backgroundColor: colors.bg_primary }}
     >
       <StatusBar
-        backgroundColor={Colors.light.text_tertiary}
-        barStyle="default"
+        backgroundColor={colors.bg_primary}
+        barStyle={theme === "light" ? "dark-content" : "light-content"}
       />
       <View style={{ flex: 1 }}>
         {/* Top Image Section */}
@@ -73,12 +77,12 @@ const Login = ({}: any) => {
           >
             {/* Back Button */}
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+               onPress={() => navigation.navigate("Welcome")}
               style={{
                 position: "absolute",
                 top: 15,
                 left: 20,
-                backgroundColor: Colors.light.text_overpic,
+                backgroundColor: colors.input_bg,
                 padding: 10,
                 borderRadius: 25,
                 justifyContent: "center",
@@ -88,7 +92,7 @@ const Login = ({}: any) => {
               <Ionicons
                 name="chevron-back"
                 size={24}
-                color={Colors.light.text_primary}
+                color={colors.text_primary}
               />
             </TouchableOpacity>
           </ImageBackground>
@@ -101,6 +105,7 @@ const Login = ({}: any) => {
             borderTopLeftRadius: 100,
             paddingHorizontal: 24,
             flexGrow: 1,
+            backgroundColor: colors.bg_primary
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -111,7 +116,7 @@ const Login = ({}: any) => {
                 style={{
                   fontFamily: "GoogleSansFlex-Bold",
                   fontSize: 24,
-                  color: Colors.light.text_primary,
+                  color: colors.text_primary,
                 }}
               >
                 Welcome Back !
@@ -119,7 +124,7 @@ const Login = ({}: any) => {
               <Ionicons
                 name="leaf"
                 size={24}
-                color={Colors.light.text_secondary}
+                color={colors.text_secondary}
                 style={{ marginLeft: 8 }}
               />
             </View>
@@ -128,7 +133,7 @@ const Login = ({}: any) => {
               style={{
                 fontFamily: "GoogleSansFlex-Regular",
                 fontSize: 16,
-                color: Colors.light.text_secondary,
+                color: colors.text_secondary,
                 marginTop: 5,
               }}
             >
@@ -143,7 +148,7 @@ const Login = ({}: any) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: Colors.light.input_bg_1,
+                backgroundColor: colors.input_bg,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -152,18 +157,18 @@ const Login = ({}: any) => {
               <Ionicons
                 name="mail-open-outline"
                 size={22}
-                color={Colors.light.form_text}
+                color={colors.input_bg_1}
               />
               <TextInput
                 placeholder="Email Address"
-                placeholderTextColor={Colors.light.form_text}
+                placeholderTextColor={colors.input_bg_1}
                 style={{
                   flex: 1,
                   marginLeft: 10,
                   fontFamily: "GoogleSansFlex-Regular",
 
                   fontSize: 16,
-                  color: Colors.light.text_form,
+                  color: colors.text_primary,
                 }}
                 value={email}
                 onChangeText={setEmail}
@@ -175,7 +180,7 @@ const Login = ({}: any) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: Colors.light.input_bg_1,
+                backgroundColor: colors.input_bg,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -184,17 +189,17 @@ const Login = ({}: any) => {
               <Ionicons
                 name="lock-closed-outline"
                 size={22}
-                color={Colors.light.form_text}
+                color={colors.input_bg_1}
               />
               <TextInput
                 placeholder="Password"
-                placeholderTextColor={Colors.light.form_text}
+                placeholderTextColor={colors.input_bg_1}
                 style={{
                   flex: 1,
                   marginLeft: 10,
                   fontFamily: "GoogleSansFlex-Regular",
                   fontSize: 16,
-                  color: "#333",
+                  color: colors.text_primary,
                 }}
                 secureTextEntry={!showPassword}
                 value={password}
@@ -204,7 +209,7 @@ const Login = ({}: any) => {
                 <Ionicons
                   name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={22}
-                  color={Colors.light.text_form}
+                  color={colors.text_primary}
                 />
               </TouchableOpacity>
             </View>
@@ -227,8 +232,8 @@ const Login = ({}: any) => {
                   size={22}
                   color={
                     rememberMe
-                      ? Colors.light.text_primary
-                      : Colors.light.text_form
+                      ? colors.text_primary
+                      : colors.input_bg_1
                   }
                 />
                 <Text
@@ -236,9 +241,7 @@ const Login = ({}: any) => {
                     marginLeft: 8,
                     fontFamily: "GoogleSansFlex-Regular",
                     fontSize: 14,
-                    color: rememberMe
-                      ? Colors.light.text_primary
-                      : Colors.light.text_form,
+                    color: colors.text_primary,
                   }}
                 >
                   Remember Me
@@ -250,7 +253,7 @@ const Login = ({}: any) => {
                   style={{
                     fontFamily: "GoogleSansFlex-Bold",
                     fontSize: 14,
-                    color: Colors.light.text_form,
+                    color: colors.text_primary,
                   }}
                 >
                   Forgot Password?
@@ -262,12 +265,12 @@ const Login = ({}: any) => {
             <TouchableOpacity
               onPress={handleLogin}
               style={{
-                backgroundColor: Colors.light.bg_primary,
+                backgroundColor: colors.text_primary,
                 paddingVertical: 18,
                 borderRadius: 30,
                 alignItems: "center",
                 marginTop: 20,
-                shadowColor: Colors.light.bg_primary,
+                shadowColor: colors.text_primary,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 10,
@@ -278,7 +281,7 @@ const Login = ({}: any) => {
                 style={{
                   fontFamily: "GoogleSansFlex-Bold",
                   fontSize: 18,
-                  color: "white",
+                  color: colors.text_overpic,
                 }}
               >
                 Login
@@ -299,7 +302,7 @@ const Login = ({}: any) => {
                 style={{
                   fontFamily: "GoogleSansFlex-Regular",
                   fontSize: 14,
-                  color: "gray",
+                  color: colors.text_secondary,
                 }}        
               >
                 Don&apos;t have an account?{" "}
@@ -308,7 +311,7 @@ const Login = ({}: any) => {
                 <Text
                   style={{
                     fontFamily: "GoogleSansFlex-Bold",
-                    color: Colors.light.text_primary,
+                    color: colors.text_primary,
                     fontSize: 14,
                     textDecorationLine: "underline",
                   }}

@@ -1,41 +1,31 @@
+import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import AuthProvider from "@/context/AuthProvider";
-import ThemeProvider from "@/context/ThemeContext";
+import ThemeProvider, { useTheme } from "@/context/ThemeContext";
 import QueryProvider from "@/providers/QueryProvider";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useFonts } from "expo-font";
-import Scan from "./screens/scan";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import "../../global.css";
+import "../global.css";
+import { useProjectFonts } from "../hooks/useProjectFonts";
+import Scan from "./screens/scan";
 
 
-import Loading from "../../components/loading";
+import Loading from "../components/loading";
 import TabsLayout from "./TabsLayout";
 import Welcome from "./auth/index";
 import Login from "./auth/login";
 import Register from "./auth/register";
 import Details from "./screens/details";
+import Language from "./screens/language";
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    "Nunito-Regular": require("../../assets/fonts/Nunito/Nunito-Regular.ttf"),
-    "Nunito-Bold": require("../../assets/fonts/Nunito/Nunito-Bold.ttf"),
-    "Nunito-Light": require("../../assets/fonts/Nunito/Nunito-Light.ttf"),
-    "Nunito-Black": require("../../assets/fonts/Nunito/Nunito-Black.ttf"),
-    "Cairo-Black": require("../../assets/fonts/Cairo/Cairo-Black.ttf"),
-    "Cairo-Bold": require("../../assets/fonts/Cairo/Cairo-Bold.ttf"),
-    "Cairo-Regular": require("../../assets/fonts/Cairo/Cairo-Regular.ttf"),
-    "Cairo-Light": require("../../assets/fonts/Cairo/Cairo-Light.ttf"),
-    "GoogleSansFlex-Regular": require("../../assets/fonts/GoogleSansFlex/GoogleSansFlex_24pt-Regular.ttf"),
-    "GoogleSansFlex-Bold": require("../../assets/fonts/GoogleSansFlex/GoogleSansFlex_24pt-Bold.ttf"),
-    "GoogleSansFlex-Light": require("../../assets/fonts/GoogleSansFlex/GoogleSansFlex_24pt-Thin.ttf"),
-    "GoogleSansFlex-Black": require("../../assets/fonts/GoogleSansFlex/GoogleSansFlex_24pt-Black.ttf"),
-  });
+  // @ts-ignore
+  const [loaded, error] = useProjectFonts();
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
@@ -55,9 +45,12 @@ export default function RootLayout() {
 
 export const Layout = () => {
   const { isLoggedIn, isLoading } = useAuth();
+  const { theme } = useTheme();
+  const colors = Colors[theme];
+  
   // console.log('isLoggedIn:', isLoggedIn);
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg_muted }}>
       {isLoading && <Stack.Screen name="Loading" component={Loading} />}
       {isLoggedIn ? (
         <Stack.Navigator>
@@ -74,6 +67,11 @@ export const Layout = () => {
            <Stack.Screen
             name="Scan"
             component={Scan}
+            options={{ headerShown: false }}
+          />
+           <Stack.Screen
+            name="Language"
+            component={Language}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

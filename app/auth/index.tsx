@@ -64,17 +64,18 @@ const Welcome = ({ navigation }: any) => {
             </View>
             <Text style={styles.appTitle}>Mya Khwar Nyo</Text>
             <View style={styles.titleUnderline} />
-          </Animated.View>
-
-          {/* Welcome Text */}
-          <Animated.View 
-            entering={FadeInUp.delay(500).duration(800)}
-            style={styles.welcomeContainer}
-          >
-            <Text style={styles.welcomeTitle}>Welcome</Text>
+             <Text style={styles.welcomeTitle}>Welcome</Text>
             <Text style={styles.welcomeSubtitle}>
               Discover the beauty of nature 
             </Text>
+          </Animated.View>
+
+          {/* Welcome Text */}
+          {/* <Animated.View 
+            entering={FadeInUp.delay(500).duration(800)}
+            style={styles.welcomeContainer}
+          >
+           
             <View style={styles.featureList}>
               <View style={styles.featureItem}>
                 <Ionicons name="leaf" size={20} color="#4caf50" />
@@ -89,7 +90,7 @@ const Welcome = ({ navigation }: any) => {
                 <Text style={styles.featureText}>Plant Database</Text>
               </View>
             </View>
-          </Animated.View>
+          </Animated.View> */}
 
           {/* Action Buttons */}
           <Animated.View 
@@ -102,7 +103,7 @@ const Welcome = ({ navigation }: any) => {
               activeOpacity={0.9}
             >
               <Text style={styles.primaryButtonText}>Get Started</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" style={{ marginLeft: 8 }} />
+              <Ionicons name="arrow-forward" size={20} color={Colors.light.text_primary} style={{ marginLeft: 8 }} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   decorativeCircle1: {
     position: "absolute",
@@ -159,8 +160,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 80,
-    paddingBottom: 60,
+    paddingTop: 120,
+    paddingBottom: 100,
     paddingHorizontal: 30,
     zIndex: 1,
   },
@@ -173,23 +174,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 110,
+    height: 110,
     borderRadius: 60,
   },
   iconGlow: {
     position: "absolute",
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 120,
+    height: 120,
+    borderRadius: 40,
     backgroundColor: "rgba(76, 175, 80, 0.2)",
-    top: -10,
-    left: -10,
+    top: -5,
+    left: -5,
     zIndex: -1,
   },
   appTitle: {
     color: Colors.light.text_overpic,
-    fontSize: 32,
+    fontSize: 26,
     fontFamily: "GoogleSansFlex-Black",
     marginBottom: 8,
     textShadowColor: "rgba(0,0,0,0.3)",
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   titleUnderline: {
-    width: 60,
+    width: 150,
     height: 4,
     backgroundColor: "#4caf50",
     borderRadius: 2,
@@ -205,11 +206,11 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     alignItems: "center",
-    maxWidth: SCREEN_WIDTH * 0.85,
+    maxWidth: SCREEN_WIDTH * 0.65,
   },
   welcomeTitle: {
     fontFamily: "GoogleSansFlex-Black",
-    fontSize: 36,
+    fontSize: 26,
     color: Colors.light.text_overpic,
     marginBottom: 12,
     textShadowColor: "rgba(0,0,0,0.3)",
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
   },
   welcomeSubtitle: {
     fontFamily: "GoogleSansFlex-Regular",
-    fontSize: 16,
+    fontSize: 12,
     color: "rgba(242, 243, 227, 0.9)",
     textAlign: "center",
     lineHeight: 24,
@@ -248,16 +249,16 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     gap: 16,
-    maxWidth: SCREEN_WIDTH * 0.85,
+    maxWidth: SCREEN_WIDTH * 0.75,
   },
   primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4caf50",
+    backgroundColor: Colors.light.bg_primary,
     paddingVertical: 18,
     borderRadius: 16,
-    shadowColor: "#4caf50",
+    shadowColor: Colors.light.bg_primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -265,8 +266,8 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontFamily: "GoogleSansFlex-Bold",
-    fontSize: 18,
-    color: "#fff",
+    fontSize: 16,
+    color: Colors.light.text_primary,
   },
   secondaryButton: {
     flexDirection: "row",
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontFamily: "GoogleSansFlex-Bold",
-    fontSize: 18,
+    fontSize: 16,
     color: "#fff",
   },
 });

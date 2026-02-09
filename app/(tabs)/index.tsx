@@ -1,4 +1,6 @@
 import { Colors } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import fetchData from "@/hooks/fetchData";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -40,9 +42,10 @@ interface PlantCardProps {
   item: any;
   index: number;
   onPress: (item: any) => void;
+  colors: any;
 }
 
-const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
+const PlantCard = React.memo(({ item, index, onPress, colors }: PlantCardProps) => {
   const scale = useSharedValue(1);
   const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
   const animatedStyle = useAnimatedStyle(() => ({
@@ -52,7 +55,11 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
   return (
     <Animated.View
       entering={FadeInDown.delay(500 + index * 50).duration(600)}
-      style={[styles.imageCard, animatedStyle]}
+      style={[
+        styles.imageCard, 
+        animatedStyle, 
+        { backgroundColor: colors.input_bg }
+      ]}
     >
       <Pressable
         onPressIn={() => {
@@ -85,24 +92,24 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
           </View>
         </View>
         <View style={styles.textContainer}>
-          <View style={styles.familyBadge}>
-            <Text style={styles.family} numberOfLines={1}>
+          <View style={[styles.familyBadge, { backgroundColor: colors.bg_primary || colors.bg_muted }]}>
+            <Text style={[styles.family, { color: colors.text_secondary }]} numberOfLines={1}>
               {item.family || "Unknown"}
             </Text>
           </View>
-          <Text style={styles.myanmarName} numberOfLines={2}>
+          <Text style={[styles.myanmarName, { color: colors.text_primary }]} numberOfLines={2}>
             {item.myanmar_name}
           </Text>
-          <Text style={styles.scientificName} numberOfLines={2}>
+          <Text style={[styles.scientificName, { color: colors.text_secondary }]} numberOfLines={2}>
             {item.scientific_name}
           </Text>
           <View style={styles.cardFooter}>
             <Ionicons
               name="leaf-outline"
               size={14}
-              color={Colors.light.text_tertiary}
+              color={colors.bg_primary}
             />
-            <Text style={styles.cardFooterText}>Plant</Text>
+            <Text style={[styles.cardFooterText, { color: colors.text_secondary }]}>Plant</Text>
           </View>
         </View>
       </Pressable>
@@ -134,6 +141,10 @@ const mock_data = [
 ];
 
 export default function Home({ navigation }: { navigation: any }) {
+  const { theme } = useTheme();
+    const {  session } = useAuth();
+  const colors = Colors[theme];
+   const userName = session?.user.user_metadata.displayName;
   const [permission, requestPermission] = useCameraPermissions();
   const [userLocation] = useState("");
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
@@ -173,17 +184,17 @@ export default function Home({ navigation }: { navigation: any }) {
     setCurrentCarouselIndex(index);
   };
   return (
-    <View style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg_muted }}>
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle="dark-content"
+        barStyle={theme === "light" ? "dark-content" : "light-content"}
       />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 20,
-          paddingTop: 60,
+          paddingTop: 10,
           paddingBottom: 10,
           gap: 24,
         }}
@@ -194,10 +205,11 @@ export default function Home({ navigation }: { navigation: any }) {
           entering={FadeInDown.delay(100).duration(600)}
           style={styles.headerContainer}
         >
+              {/* <Text style={[styles.appTitle, { color: colors.text_primary }]}>Mya Khwar Nyo</Text> */}
           <View style={styles.headerContent}>
-            <View>
-              <Text style={styles.greeting}>Hello! 👋</Text>
-              <Text style={styles.appTitle}>Mya Khwar Nyo</Text>
+            <View style={styles.greetingContainer}>
+              <Text style={[styles.greeting, { color: colors.text_secondary }]}>Hello! 👋</Text>
+              <Text style={[styles.greetingUsername, { color: colors.text_primary }]}>{userName}</Text>
             </View>
             <Pressable
               onPress={() =>
@@ -205,9 +217,9 @@ export default function Home({ navigation }: { navigation: any }) {
               }
               style={styles.locationButton}
             >
-              <View style={styles.locationButtonInner}>
-                <Ionicons name="location" size={18} color="#4caf50" />
-                <Text style={styles.locationText}>
+              <View style={[styles.locationButtonInner, { backgroundColor: colors.input_bg }]}>
+                <Ionicons name="location" size={18} color={colors.text_primary} />
+                <Text style={[styles.locationText, { color: colors.text_primary }]}>
                   {userLocation ? userLocation : "Set location"}
                 </Text>
               </View>
@@ -218,16 +230,17 @@ export default function Home({ navigation }: { navigation: any }) {
         {/* Enhanced Recent Scans Carousel */}
         <Animated.View entering={FadeInUp.delay(200).duration(600)}>
           <View style={styles.sectionHeader}>
+            
             <View>
-              <Text style={styles.sectionTitle}>Recent Scans</Text>
-              <Text style={styles.sectionSubtitle}>Your plant discoveries</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text_primary }]}>Recent Scans</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.text_secondary }]}>Your plant discoveries</Text>
             </View>
             <Pressable
               onPress={() =>
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
               }
             >
-              <Text style={styles.seeAllText}>See All →</Text>
+              <Text style={[styles.seeAllText, { color: colors.bg_primary }]}>See All →</Text>
             </Pressable>
           </View>
 
@@ -256,7 +269,7 @@ export default function Home({ navigation }: { navigation: any }) {
                   >
                     <View style={styles.carouselGradient}>
                       <View style={styles.carouselContent}>
-                        <View style={styles.carouselBadge}>
+                        <View style={[styles.carouselBadge, { backgroundColor: colors.bg_primary }]}>
                           <Ionicons name="camera" size={14} color="#fff" />
                           <Text style={styles.carouselBadgeText}>Scanned</Text>
                         </View>
@@ -287,7 +300,7 @@ export default function Home({ navigation }: { navigation: any }) {
                   key={i}
                   style={[
                     styles.indicator,
-                    currentCarouselIndex === i && styles.indicatorActive,
+                    currentCarouselIndex === i && { ...styles.indicatorActive, backgroundColor: colors.bg_primary },
                   ]}
                 />
               ))}
@@ -298,8 +311,8 @@ export default function Home({ navigation }: { navigation: any }) {
         <Animated.View entering={FadeInUp.delay(400).duration(600)}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionTitle}>Featured Collections</Text>
-              <Text style={styles.sectionSubtitle}>
+              <Text style={[styles.sectionTitle, { color: colors.text_primary }]}>Featured Collections</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.text_secondary }]}>
                 {flowers?.length || 0} plants for you to explore
               </Text>
             </View>
@@ -307,7 +320,7 @@ export default function Home({ navigation }: { navigation: any }) {
 
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading plants...</Text>
+              <Text style={[styles.loadingText, { color: colors.text_secondary }]}>Loading plants...</Text>
             </View>
           ) : (
             <FlatList
@@ -322,6 +335,7 @@ export default function Home({ navigation }: { navigation: any }) {
                   item={item}
                   index={index}
                   onPress={handlePlantPress}
+                  colors={colors}
                 />
               )}
             />
@@ -332,7 +346,7 @@ export default function Home({ navigation }: { navigation: any }) {
       {/* Floating Scan Button */}
       <Animated.View
         entering={FadeInUp.delay(800).duration(600)}
-        style={styles.scanButtonContainer}
+        style={[styles.scanButtonContainer, { backgroundColor: colors.bg_primary, shadowColor: colors.bg_primary }]}
       >
         <Pressable
           onPress={handleCameraPress}
@@ -354,12 +368,10 @@ const styles = StyleSheet.create({
     bottom: 120,
     right: 20,
     zIndex: 100,
-    backgroundColor: "#4caf50",
     paddingHorizontal: 14,
     paddingVertical: 14,
     borderRadius: 30,
     gap: 10,
-    shadowColor: "#4caf50",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -384,19 +396,29 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
   },
-  greeting: {
-    fontSize: 16,
-    fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
-    marginBottom: 4,
-  },
+ 
   appTitle: {
     fontSize: 32,
     fontFamily: "GoogleSansFlex-Black",
-    color: Colors.light.text_primary,
     letterSpacing: -0.5,
+  },
+   greetingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+   
+  },
+   greeting: {
+    fontSize: 16,
+    fontFamily: "GoogleSansFlex-Regular",
+    marginBottom: 4,
+  },
+   greetingUsername: {
+    fontSize: 20,
+    fontFamily: "GoogleSansFlex-Black",
+    marginBottom: 4,
   },
   locationButton: {
     marginTop: 4,
@@ -407,7 +429,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: "#fff",
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -418,29 +439,26 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 12,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_primary,
   },
+ 
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
+    alignItems: "center",
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 22,
     fontFamily: "GoogleSansFlex-Black",
-    color: Colors.light.text_primary,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
   },
   seeAllText: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: "#4caf50",
   },
   carouselContainer: {
     marginTop: 8,
@@ -477,7 +495,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     alignSelf: "flex-start",
-    backgroundColor: "rgba(76, 175, 80, 0.9)",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
@@ -530,7 +547,6 @@ const styles = StyleSheet.create({
   },
   indicatorActive: {
     width: 24,
-    backgroundColor: "#4caf50",
   },
   loadingContainer: {
     padding: 40,
@@ -539,13 +555,11 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
   },
   imageCard: {
     flex: 1,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -583,7 +597,6 @@ const styles = StyleSheet.create({
   },
   familyBadge: {
     alignSelf: "flex-start",
-    backgroundColor: Colors.light.bg_secondary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -591,21 +604,18 @@ const styles = StyleSheet.create({
   family: {
     fontSize: 10,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_secondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   myanmarName: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_primary,
     lineHeight: 20,
   },
   scientificName: {
     fontSize: 12,
     fontFamily: "GoogleSansFlex-Regular",
     fontStyle: "italic",
-    color: Colors.light.text_secondary,
     lineHeight: 20,
   },
   cardFooter: {
@@ -617,6 +627,5 @@ const styles = StyleSheet.create({
   cardFooterText: {
     fontSize: 11,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
   },
 });
