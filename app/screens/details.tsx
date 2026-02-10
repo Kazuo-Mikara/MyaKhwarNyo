@@ -51,7 +51,19 @@ export default function Details({ navigation }: { navigation: any }) {
     myanmar_name,
     water_requirement,
     light_requirement,
-    temperature_range
+    temperature_range,
+    uses,
+    uses_mm,
+    soil_preference,
+    soil_preference_mm,
+    growth_rate,
+    growth_rate_mm,
+    typical_height,
+    typical_height_mm,
+    habitat,
+    habitat_mm,
+    
+    
   } = params;
   const displayName = myanmar_name || name || "Plant Details";
 
@@ -256,13 +268,16 @@ export default function Details({ navigation }: { navigation: any }) {
             <Text style={styles.sectionTitle_Small}>CHARACTERISTICS</Text>
              <View style={styles.tagsContainer}>
                 <View style={styles.tagPill}>
-                    <Text style={styles.tagText}>🌿 Native to Myanmar</Text>
+                    <Text style={styles.tagText}>{language === "mm" ? habitat_mm : habitat}</Text>
                 </View>
                 <View style={styles.tagPill}>
-                    <Text style={styles.tagText}>🌸 Flowering</Text>
+                    <Text style={styles.tagText}>{language === "mm" ? soil_preference_mm : soil_preference}</Text>
                 </View>
                 <View style={styles.tagPill}>
-                    <Text style={styles.tagText}>🍃 Perennial</Text>
+                    <Text style={styles.tagText}>{language === "mm" ? typical_height_mm : typical_height}</Text>
+              </View>
+               <View style={styles.tagPill}>
+                    <Text style={styles.tagText}>{language === "mm" ? uses_mm : uses}</Text>
                 </View>
              </View>
            </View>
@@ -421,22 +436,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   careIconBox: {
-    width: 56,
-    height: 56,
+    width: 60,
+    height: 60,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
   },
   careLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
     color: Colors.light.text_secondary,
     marginBottom: 2,
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   careValue: {
-    fontSize: 14,
+    fontSize: 10,
     fontFamily: "GoogleSansFlex-Regular",
     color: Colors.light.text_primary,
   },
