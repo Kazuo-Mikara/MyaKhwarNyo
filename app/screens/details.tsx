@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useLanguage } from "@/context/LanguageContext";
 import Animated, {
   FadeInUp,
   useAnimatedStyle,
@@ -29,7 +30,7 @@ export default function Details({ navigation }: { navigation: any }) {
   const localParams = useLocalSearchParams();
   const route = useRoute();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [language,setLanguage]=useState("mm");
+  const { language } = useLanguage();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const { addFavoriteFlower, removeFromFavorite, getFavoriteFlowers } =
     useFavoriteFlowers();

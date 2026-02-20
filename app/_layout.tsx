@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import AuthProvider from "@/context/AuthProvider";
+import LanguageProvider from "@/context/LanguageContext";
 import ThemeProvider, { useTheme } from "@/context/ThemeContext";
 import QueryProvider from "@/providers/QueryProvider";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -34,11 +35,13 @@ export default function RootLayout() {
   if (!loaded && error) return null;
   return (
     <ThemeProvider>
+      <LanguageProvider>
       <AuthProvider>
         <QueryProvider>
           <Layout></Layout>
         </QueryProvider>
       </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

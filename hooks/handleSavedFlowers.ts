@@ -56,7 +56,7 @@ export const useSavedFlowers = () => {
     }
     const { data } = await supabase
       .from("saved_flowers")
-      .select("*")
+      .select(`*,plants(myanmar_name,scientific_name,image_url,family)`)
       .eq("user_id", userId);
     return data || [];
   };
