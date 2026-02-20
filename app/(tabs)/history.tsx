@@ -2,11 +2,12 @@ import { useAuth } from "@/context/AuthContext";
 import { fetchFlowerById } from "@/hooks/fetchData";
 import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
 import useDateFormat from "@/hooks/useDateFormat";
+import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   Image,
   Pressable,
@@ -31,9 +32,7 @@ export default function History() {
     queryKey: ["savedFlowers", userId],
     queryFn: async () => {
       const getSaveFlowers = await getSavedFlowers();
-      console.log("getSaveFlowers", getSaveFlowers);
       if (!getSaveFlowers || !Array.isArray(getSaveFlowers)) return [];
-
       const flowerData = await Promise.all(
         getSaveFlowers.map(async (flower: any) => {
           const data = await fetchFlowerById(flower.flower_id);
@@ -45,10 +44,39 @@ export default function History() {
     enabled: !!userId,
   });
 
+useFocusEffect(
+  useCallback(() => {
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: ["savedFlowers", userId] });
+    }
+  }, [userId])
+);
 
+  // useEffect for Real-time subscription to Supabase changes
   useEffect(() => {
     if (!userId) return;
-  }, [userId, queryClient,  getSavedFlowers]);
+
+    const channel = supabase
+      .channel("garden_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "saved_flowers",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          // Invalidate and refetch when any change occurs in the database
+          queryClient.invalidateQueries({ queryKey: ["savedFlowers", userId] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [userId, queryClient]);
 
   const handleRemove = async (flowerId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

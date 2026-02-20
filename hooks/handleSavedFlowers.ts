@@ -56,8 +56,9 @@ export const useSavedFlowers = () => {
     }
     const { data } = await supabase
       .from("saved_flowers")
-      .select(`*,plants(myanmar_name,scientific_name,image_url,family)`)
-      .eq("user_id", userId);
+      .select(`*`)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true });
     return data || [];
   };
 
