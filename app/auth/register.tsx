@@ -3,24 +3,26 @@ import { useTheme } from "@/context/ThemeContext";
 import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
-const Register = ({ navigation }: any) => {
+const Register = () => {
   const { theme } = useTheme();
   const colors = Colors[theme];
+  const router = useRouter();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +59,7 @@ const Register = ({ navigation }: any) => {
       Alert.alert("Error", error.message);
     } else {
       Alert.alert("Success", "User registered successfully");
-      navigation.navigate("Login");
+      router.push("/auth/login");
     }
   };
 
@@ -92,7 +94,7 @@ const Register = ({ navigation }: any) => {
           >
             {/* Back Button */}
             <TouchableOpacity
-              onPress={() => navigation.navigate("Welcome")}
+              onPress={() => router.push("/auth")}
               style={{
                 position: "absolute",
                 top: 20,
@@ -395,7 +397,7 @@ const Register = ({ navigation }: any) => {
               >
                 Already have an account?{" "}
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              <TouchableOpacity onPress={() => router.push("/auth/login")}>
                 <Text
                   style={{
                     fontFamily: "GoogleSansFlex-Bold",

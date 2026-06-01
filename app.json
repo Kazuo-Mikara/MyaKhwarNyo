@@ -45,7 +45,8 @@
           }
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "react-native-fast-tflite"
     ],
     "experiments": {
       "typedRoutes": true,

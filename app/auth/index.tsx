@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   Dimensions,
@@ -16,15 +17,17 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const Welcome = ({ navigation }: any) => {
+const Welcome = () => {
+  const router = useRouter();
+  
   const handleSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Login");
+    router.push("/auth/login");
   };
 
   const handleRegister = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Register");
+    router.push("/auth/register");
   };
 
   return (

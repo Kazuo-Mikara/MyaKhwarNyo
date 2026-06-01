@@ -4,18 +4,19 @@ import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
 import useDateFormat from "@/hooks/useDateFormat";
 import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect } from "react";
 import {
-  Image,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
+    Image,
+    Pressable,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 
@@ -24,7 +25,7 @@ export default function History() {
   const { session } = useAuth();
   const userId = session?.user?.id;
   const queryClient = useQueryClient();
-  const navigation = useNavigation() as any;
+  const router = useRouter();
   const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
 
   // useQuery for fetching and caching saved flowers
@@ -162,12 +163,15 @@ useFocusEffect(
 
                 <View style={styles.actionsRow}>
                   <Pressable
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      navigation.navigate("Details", { ...flower });
-                    }}
-                    style={styles.detailsButton}
-                  >
+                      onPress={() => {
+                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                         router.push({
+                           pathname: "/screens/details",
+                           params: { ...flower },
+                         });
+                       }}
+                       style={styles.detailsButton}
+                     >
                     <Text style={styles.detailsButtonText}>View Details</Text>
                   </Pressable>
 

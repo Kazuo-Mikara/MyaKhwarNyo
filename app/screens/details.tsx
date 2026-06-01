@@ -1,5 +1,6 @@
 import HorizontalPlantCard from "@/components/HorizontalPlantCard";
 import { Colors } from "@/constants/theme";
+import { useLanguage } from "@/context/LanguageContext";
 import { useFavoriteFlowers } from "@/hooks/handleFavoriteFlowers";
 import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
 import { useMostFavoriteFlowers } from "@/hooks/useMostFavriteFlowers";
@@ -7,10 +8,9 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useLanguage } from "@/context/LanguageContext";
 import Animated, {
   FadeInUp,
   useAnimatedStyle,
@@ -25,10 +25,11 @@ const imageSharedTransition =
     ((Animated as any).SharedTransition as any).duration(800).springify()
     : undefined;
 
-export default function Details({ navigation }: { navigation: any }) {
+export default function Details() {
   const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
   const localParams = useLocalSearchParams();
   const route = useRoute();
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const { language } = useLanguage();
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -170,7 +171,7 @@ export default function Details({ navigation }: { navigation: any }) {
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                navigation.goBack();
+                router.back();
               }}
               style={styles.iconButton}
             >
@@ -291,7 +292,7 @@ export default function Details({ navigation }: { navigation: any }) {
                     <Text style={styles.seeAllText}>See All</Text>
                 </Pressable>
              </View>
-             <HorizontalList navigation={navigation} />
+             <HorizontalList />
            </View>
         </Animated.View>
       </ScrollView>
@@ -304,13 +305,17 @@ export default function Details({ navigation }: { navigation: any }) {
   );
 }
 
-const HorizontalList = ({ navigation }: { navigation: any }) => {
+const HorizontalList = () => {
     const { data: favoriteFlowers } = useMostFavoriteFlowers();
+    const router = useRouter();
   
     const handlePress = (item: any) => {
-      navigation.push("Details", {
-        name: item.scientific_name,
-        ...item,
+      router.push({
+        pathname: "/screens/details",
+        params: {
+          name: item.scientific_name,
+          ...item,
+        },
       });
     };
   

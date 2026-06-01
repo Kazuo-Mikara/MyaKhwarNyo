@@ -2,7 +2,7 @@ import { Colors } from "@/constants/theme";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import {
@@ -19,7 +19,7 @@ export default function Language() {
   const { languageMode, setLanguageMode } = useLanguage();
   const { theme } = useTheme();
   const colors = Colors[theme];
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const handleLanguageChange = (mode: "en" | "mm") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -28,7 +28,7 @@ export default function Language() {
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.goBack();
+    router.back();
   };
 
   const LanguageOption = ({

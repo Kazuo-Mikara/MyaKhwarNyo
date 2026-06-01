@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   Dimensions,
@@ -109,18 +110,22 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
 
 PlantCard.displayName = "PlantCard";
 
-export default function Explore({ navigation }: { navigation: any }) {
+export default function Explore() {
+  const router = useRouter();
   const handlePlantPress = (item: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Details", {
-      name: item.scientific_name,
-      ...item,
+    router.push({
+      pathname: "/screens/details",
+      params: {
+        name: item.scientific_name,
+        ...item,
+      },
     });
   };
   const { data: flowers, isLoading } = useQuery({
     queryKey: ["explore_flowers"],
     queryFn: async () => {
-      return await fetchData({ items: 30, orderBy: "scientific_name" });
+      return await fetchData({ items: 35, orderBy: "scientific_name" });
     },
   });
   return (

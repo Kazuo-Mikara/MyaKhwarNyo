@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
@@ -140,10 +141,11 @@ const mock_data = [
   },
 ];
 
-export default function Home({ navigation }: { navigation: any }) {
+export default function Home() {
   const { theme } = useTheme();
     const {  session } = useAuth();
   const colors = Colors[theme];
+  const router = useRouter();
    const userName = session?.user.user_metadata.displayName;
   const [permission, requestPermission] = useCameraPermissions();
   const [userLocation] = useState("");
@@ -167,14 +169,17 @@ export default function Home({ navigation }: { navigation: any }) {
       }
     }
     // Proceed with scanning
-    navigation.navigate("Scan");
+    router.push("/screens/scan");
   };
 
   const handlePlantPress = (item: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Details", {
-      name: item.scientific_name,
-      ...item,
+    router.push({
+      pathname: "/screens/details",
+      params: {
+        name: item.scientific_name,
+        ...item,
+      },
     });
   };
 

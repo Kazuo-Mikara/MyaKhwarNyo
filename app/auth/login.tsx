@@ -2,19 +2,19 @@ import { Colors } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 import { supabase } from "@/providers/SupabaseClient";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const Login = ({}: any) => {
@@ -25,7 +25,7 @@ const Login = ({}: any) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -44,7 +44,7 @@ const Login = ({}: any) => {
         Alert.alert("Error", error.message);
       }
       else {
-        navigation.navigate("Home");
+        router.replace("/(tabs)");
       }
     }
       
@@ -77,7 +77,7 @@ const Login = ({}: any) => {
           >
             {/* Back Button */}
             <TouchableOpacity
-               onPress={() => navigation.navigate("Welcome")}
+               onPress={() => router.push("/auth")}
               style={{
                 position: "absolute",
                 top: 15,
@@ -307,7 +307,7 @@ const Login = ({}: any) => {
               >
                 Don&apos;t have an account?{" "}
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+              <TouchableOpacity onPress={() => router.push("/auth/register")}>
                 <Text
                   style={{
                     fontFamily: "GoogleSansFlex-Bold",
