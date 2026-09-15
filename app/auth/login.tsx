@@ -20,11 +20,14 @@ import {
 const Login = ({}: any) => {
   const { theme } = useTheme();
   const colors = Colors[theme];
+  const bg = theme === "dark" ? "#1A1D21" : colors.bg_muted;
+  const inputBg = theme === "dark" ? "#242A33" : colors.input_bg;
+  const borderColor = theme === "dark" ? "#333A45" : colors.input_bg_1;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+
   const router = useRouter();
 
   const handleShowPassword = () => {
@@ -53,10 +56,10 @@ const Login = ({}: any) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1, backgroundColor: colors.bg_primary }}
+      style={{ flex: 1, backgroundColor: bg }}
     >
       <StatusBar
-        backgroundColor={colors.bg_primary}
+        backgroundColor={bg}
         barStyle={theme === "light" ? "dark-content" : "light-content"}
       />
       <View style={{ flex: 1 }}>
@@ -105,7 +108,7 @@ const Login = ({}: any) => {
             borderTopLeftRadius: 100,
             paddingHorizontal: 24,
             flexGrow: 1,
-            backgroundColor: colors.bg_primary
+            backgroundColor: bg
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -148,7 +151,9 @@ const Login = ({}: any) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: colors.input_bg,
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                borderWidth: 1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -180,7 +185,9 @@ const Login = ({}: any) => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: colors.input_bg,
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                borderWidth: 1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -223,32 +230,9 @@ const Login = ({}: any) => {
                 marginTop: 5,
               }}
             >
-              <TouchableOpacity
-                style={{ flexDirection: "row", alignItems: "center" }}
-                onPress={() => setRememberMe(!rememberMe)}
-              >
-                <Ionicons
-                  name={rememberMe ? "checkmark-circle" : "ellipse-outline"}
-                  size={22}
-                  color={
-                    rememberMe
-                      ? colors.text_primary
-                      : colors.input_bg_1
-                  }
-                />
-                <Text
-                  style={{
-                    marginLeft: 8,
-                    fontFamily: "GoogleSansFlex-Regular",
-                    fontSize: 14,
-                    color: colors.text_primary,
-                  }}
-                >
-                  Remember Me
-                </Text>
-              </TouchableOpacity>
+              <View style={{ flex: 1 }} />
 
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => Alert.alert("Contact Admin", "Please contact the administration to reset your password.")}>
                 <Text
                   style={{
                     fontFamily: "GoogleSansFlex-Bold",

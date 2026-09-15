@@ -1,18 +1,18 @@
 import { Colors } from "@/constants/theme";
 import { useLanguage } from "@/context/LanguageContext";
-import { useFavoriteFlowers } from "@/hooks/handleFavoriteFlowers";
+
 import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, {
-    FadeInUp,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
 } from "react-native-reanimated";
 
 // TODO: Update this import to point to your actual Supabase client initialization file
@@ -31,19 +31,12 @@ export default function ScanDetails() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Bookmark & Favorite States
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const { addFavoriteFlower, removeFromFavorite, getFavoriteFlowers } = useFavoriteFlowers();
   const { addSavedFlower, removeFromSavedFlower, getSavedFlowers } = useSavedFlowers();
 
   // Animations
-  const favoriteScale = useSharedValue(1);
   const bookmarkScale = useSharedValue(1);
   const shareScale = useSharedValue(1);
-
-  const favoriteAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: favoriteScale.value }],
-  }));
   const bookmarkAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bookmarkScale.value }],
   }));
@@ -52,26 +45,26 @@ export default function ScanDetails() {
   }));
 
   // Fetch missing plant details from Supabase using the scanned commonName
- useEffect(() => {
+  useEffect(() => {
     const fetchFullPlantDetails = async () => {
       if (!commonName) return;
-      
+
       try {
         // 1. Clean the string to prevent whitespace matching errors
         const cleanName = String(commonName).trim();
 
         // 2. Fetch safely using an array with a limit, completely avoiding .single()
         const { data, error } = await supabase
-          .from("plants") 
+          .from("plants")
           .select("*")
-          .ilike("common_name", `%${cleanName}%`)
+          .ilike("scientific_name", `%${cleanName}%`)
           .limit(1); // Only grab the top result even if multiple exist
 
         if (error) {
           console.error("Supabase Query Error:", error.message);
           return;
         }
-
+        console.log(data);
         // 3. Extract the first item from the array safely
         if (data && data.length > 0) {
           const matchedPlant = data[0];
@@ -89,24 +82,14 @@ export default function ScanDetails() {
   }, [commonName]);
 
   const checkInteractions = async (flowerId: string) => {
-    const favorites = await getFavoriteFlowers();
-    if (favorites) {
-      setIsFavorite(favorites.some((fav: any) => fav.flower_id === flowerId));
-    }
+
     const bookmarks = await getSavedFlowers();
     if (Array.isArray(bookmarks)) {
       setIsBookmarked(bookmarks.some((bookmark: any) => bookmark.flower_id === flowerId));
     }
   };
 
-  const handleFavorite = async () => {
-    if (!plantData?.id) return;
-    favoriteScale.value = withSpring(0.8, {}, () => { favoriteScale.value = withSpring(1); });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    newStatus ? await addFavoriteFlower(plantData.id) : await removeFromFavorite(plantData.id);
-  };
+
 
   const handleBookmark = async () => {
     if (!plantData?.id) return;
@@ -120,6 +103,10 @@ export default function ScanDetails() {
   const handleShare = () => {
     shareScale.value = withSpring(0.8, {}, () => { shareScale.value = withSpring(1); });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const nameToSearch = plantData?.myanmar_name || plantData?.name || commonName;
+    if (nameToSearch) {
+      Linking.openURL(`https://www.google.com/search?q=${encodeURIComponent(nameToSearch)}`);
+    }
   };
 
   const displayName = plantData?.myanmar_name || plantData?.name || commonName || "Unknown Plant";
@@ -127,7 +114,7 @@ export default function ScanDetails() {
   return (
     <View style={styles.container}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} bounces={false}>
-        
+
         {/* Full Image Hero with Local Camera URI */}
         <View style={styles.heroContainer}>
           <Animated.Image
@@ -156,7 +143,7 @@ export default function ScanDetails() {
               <View style={styles.headerRightActions}>
                 <Pressable onPress={handleShare} style={styles.iconButton}>
                   <Animated.View style={shareAnimatedStyle}>
-                    <Ionicons name="share-social-outline" size={22} color="#fff" />
+                    <Ionicons name="search-outline" size={22} color="#fff" />
                   </Animated.View>
                 </Pressable>
                 <Pressable onPress={handleBookmark} style={styles.iconButton}>
@@ -164,11 +151,7 @@ export default function ScanDetails() {
                     <Ionicons name={isBookmarked ? "bookmark" : "bookmark-outline"} size={22} color="#fff" />
                   </Animated.View>
                 </Pressable>
-                <Pressable onPress={handleFavorite} style={styles.iconButton}>
-                  <Animated.View style={favoriteAnimatedStyle}>
-                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={22} color={isFavorite ? "#ff4757" : "#fff"} />
-                  </Animated.View>
-                </Pressable>
+
               </View>
             )}
           </View>
@@ -188,9 +171,9 @@ export default function ScanDetails() {
                 </View>
               )}
             </View>
-            
+
             <Text style={styles.heroTitle}>{displayName}</Text>
-            
+
             {plantData?.scientific_name && (
               <Text style={styles.heroSubtitle}>{plantData.scientific_name}</Text>
             )}
@@ -199,7 +182,7 @@ export default function ScanDetails() {
 
         {/* Content Body */}
         <Animated.View entering={FadeInUp.delay(500).springify().damping(50)} style={styles.bodyContainer}>
-          
+
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#009688" />
@@ -242,7 +225,7 @@ export default function ScanDetails() {
               {/* Description Section */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>About this plant</Text>
-                <Text style={[styles.descriptionText, language === "mm" ? {fontFamily: "Phan-Tee-Regular"} : {fontFamily: "GoogleSansFlex-Regular"}]}>
+                <Text style={[styles.descriptionText, language === "mm" ? { fontFamily: "Phan-Tee-Regular" } : { fontFamily: "GoogleSansFlex-Regular" }]}>
                   {language === "mm" ? plantData.description_mm : plantData.description_en}
                 </Text>
               </View>

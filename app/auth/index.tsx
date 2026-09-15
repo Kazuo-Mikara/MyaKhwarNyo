@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -19,6 +20,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const Welcome = () => {
   const router = useRouter();
+  const { theme } = useTheme();
+  const colors = Colors[theme];
+  const styles = getStyles(colors);
   
   const handleSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -106,7 +110,7 @@ const Welcome = () => {
               activeOpacity={0.9}
             >
               <Text style={styles.primaryButtonText}>Get Started</Text>
-              <Ionicons name="arrow-forward" size={20} color={Colors.light.text_primary} style={{ marginLeft: 8 }} />
+              <Ionicons name="arrow-forward" size={20} color={colors.text_primary} style={{ marginLeft: 8 }} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -124,7 +128,7 @@ const Welcome = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -192,7 +196,7 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   appTitle: {
-    color: Colors.light.text_overpic,
+    color: colors.text_overpic,
     fontSize: 26,
     fontFamily: "GoogleSansFlex-Black",
     marginBottom: 8,
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontFamily: "GoogleSansFlex-Black",
     fontSize: 26,
-    color: Colors.light.text_overpic,
+    color: colors.text_overpic,
     marginBottom: 12,
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 2 },
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
   featureText: {
     fontFamily: "GoogleSansFlex-Regular",
     fontSize: 10,
-    color: Colors.light.text_overpic,
+    color: colors.text_overpic,
   },
   buttonContainer: {
     width: "100%",
@@ -258,10 +262,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.light.bg_primary,
+    backgroundColor: colors.bg_primary,
     paddingVertical: 18,
     borderRadius: 16,
-    shadowColor: Colors.light.bg_primary,
+    shadowColor: colors.bg_primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -270,7 +274,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontFamily: "GoogleSansFlex-Bold",
     fontSize: 16,
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
   },
   secondaryButton: {
     flexDirection: "row",

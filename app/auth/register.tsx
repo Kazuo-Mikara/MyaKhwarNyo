@@ -22,6 +22,9 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 const Register = () => {
   const { theme } = useTheme();
   const colors = Colors[theme];
+  const bg = theme === "dark" ? "#1A1D21" : colors.bg_muted;
+  const inputBg = theme === "dark" ? "#242A33" : colors.input_bg;
+  const borderColor = theme === "dark" ? "#333A45" : colors.input_bg_1;
   const router = useRouter();
   
   const [email, setEmail] = useState("");
@@ -70,10 +73,10 @@ const Register = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1, backgroundColor: colors.bg_primary }}
+      style={{ flex: 1, backgroundColor: bg }}
     >
       <StatusBar
-        backgroundColor={colors.text_tertiary}
+        backgroundColor={bg}
         barStyle={theme === "light" ? "dark-content" : "light-content"}
       />
       <View style={{ flex: 1 }}>
@@ -173,7 +176,9 @@ const Register = () => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: colors.input_bg,
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                borderWidth: 1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -205,7 +210,9 @@ const Register = () => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: colors.input_bg,
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                borderWidth: 1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -239,7 +246,9 @@ const Register = () => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: colors.input_bg,
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                borderWidth: 1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,
@@ -279,7 +288,9 @@ const Register = () => {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: colors.input_bg,
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                borderWidth: 1,
                 borderRadius: 15,
                 paddingHorizontal: 15,
                 paddingVertical: 14,

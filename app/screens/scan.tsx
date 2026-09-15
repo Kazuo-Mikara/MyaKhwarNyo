@@ -40,58 +40,58 @@ const Scan = () => {
   };
 
   const handleShutterPress = async () => {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-  if (cameraRef.current && !isProcessing) {
-    try {
-      setIsProcessing(true);
+    if (cameraRef.current && !isProcessing) {
+      try {
+        setIsProcessing(true);
 
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.8,
-        skipProcessing: false,
-      });
-
-      if (!photo?.uri) throw new Error("Capture stream returned null");
-
-      const formData = new FormData();
-      // Extract local file path (already a file:// URI in Expo)
-      formData.append("file", {
-        uri: photo.uri,
-        name: "scan.jpg",
-        type: "image/jpeg",
-      } as any); // TypeScript workaround
-
-      // Replace with your computer's actual IP address
-      const serverUrl = "http://192.168.1.9:8000/predict";
-
-      const response = await fetch(serverUrl, {
-        method: "POST",
-        body: formData,
-        // Do NOT set Content-Type header manually – fetch will set it with boundary
-      });
-
-      const result = await response.json();
-      setIsProcessing(false);
-
-      if (result.success) {
-        router.push({
-          pathname: "/screens/scan_details",
-          params: {
-            imageUri: photo.uri,
-            commonName: result.commonName,
-            confidence: Number(result.confidence).toFixed(1),
-          },
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+          skipProcessing: false,
         });
-      } else {
-        Alert.alert("Scan Unsuccessful", result.message || "Try adjusting your camera focus.");
+
+        if (!photo?.uri) throw new Error("Capture stream returned null");
+
+        const formData = new FormData();
+        // Extract local file path (already a file:// URI in Expo)
+        formData.append("file", {
+          uri: photo.uri,
+          name: "scan.jpg",
+          type: "image/jpeg",
+        } as any); // TypeScript workaround
+
+        // Replace with your computer's actual IP address
+        const serverUrl = "https://kazuo38-myakhwarnyo-api.hf.space/predict";
+
+        const response = await fetch(serverUrl, {
+          method: "POST",
+          body: formData,
+          // Do NOT set Content-Type header manually – fetch will set it with boundary
+        });
+
+        const result = await response.json();
+        setIsProcessing(false);
+
+        if (result.success) {
+          router.push({
+            pathname: "/screens/scan_details",
+            params: {
+              imageUri: photo.uri,
+              commonName: result.commonName,
+              confidence: Number(result.confidence).toFixed(1),
+            },
+          });
+        } else {
+          Alert.alert("Scan Unsuccessful", result.message || "Try adjusting your camera focus.");
+        }
+      } catch (err) {
+        console.error("Network error:", err);
+        setIsProcessing(false);
+        Alert.alert("Connection Error", `Could not connect to server. Make sure your phone and computer are on the same Wi-Fi, and the server is running.`);
       }
-    } catch (err) {
-      console.error("Network error:", err);
-      setIsProcessing(false);
-      Alert.alert("Connection Error", `Could not connect to server at ${serverUrl}. Make sure your phone and computer are on the same Wi-Fi, and the server is running.`);
     }
-  }
-};
+  };
 
   const handleRequestPermission = async () => {
     const result = await requestPermission();
@@ -178,8 +178,8 @@ const Scan = () => {
           <Ionicons name="images-outline" size={26} color="#ddd" />
         </Pressable>
 
-        <Pressable 
-          style={[styles.shutterOuter, isProcessing && styles.disabledShutter]} 
+        <Pressable
+          style={[styles.shutterOuter, isProcessing && styles.disabledShutter]}
           onPress={handleShutterPress}
           disabled={isProcessing}
         >

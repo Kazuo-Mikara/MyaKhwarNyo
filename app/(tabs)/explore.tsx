@@ -1,8 +1,10 @@
 import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import fetchData from "@/hooks/fetchData";
 import { Feather } from "@expo/vector-icons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
+import { useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -41,9 +43,11 @@ interface PlantCardProps {
   item: any;
   index: number;
   onPress: (item: any) => void;
+  colors: any;
 }
 
-const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
+const PlantCard = React.memo(({ item, index, onPress, colors }: PlantCardProps) => {
+  const styles = getStyles(colors);
   const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -52,7 +56,7 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(500 + index * 50).duration(600)}
+      entering={FadeInDown.delay(index < 10 ? 300 + index * 50 : 0).duration(500)}
       style={[styles.imageCard, animatedStyle]}
     >
       <Pressable
@@ -98,7 +102,7 @@ const PlantCard = React.memo(({ item, index, onPress }: PlantCardProps) => {
             <Ionicons
               name="leaf-outline"
               size={14}
-              color={Colors.light.text_tertiary}
+              color={colors.text_tertiary}
             />
             <Text style={styles.cardFooterText}>Plant</Text>
           </View>
@@ -112,7 +116,10 @@ PlantCard.displayName = "PlantCard";
 
 export default function Explore() {
   const router = useRouter();
-  const handlePlantPress = (item: any) => {
+  const { theme } = useTheme();
+  const colors = Colors[theme];
+  const styles = getStyles(colors);
+  const handlePlantPress = React.useCallback((item: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: "/screens/details",
@@ -121,6 +128,30 @@ export default function Explore() {
         ...item,
       },
     });
+  }, [router]);
+
+  const [permission, requestPermission] = useCameraPermissions();
+  const [searchInput, setSearchInput] = React.useState("");
+  const [debouncedQuery, setDebouncedQuery] = React.useState("");
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const handleCameraPress = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        alert("Camera permission is required to scan plants.");
+        return;
+      }
+    }
+    // Proceed with scanning
+    router.push("/screens/scan");
   };
   const { data: flowers, isLoading } = useQuery({
     queryKey: ["explore_flowers"],
@@ -128,99 +159,115 @@ export default function Explore() {
       return await fetchData({ items: 35, orderBy: "scientific_name" });
     },
   });
+
+  const filteredFlowers = React.useMemo(() => {
+    if (!debouncedQuery) return flowers;
+    const lowerQuery = debouncedQuery.toLowerCase();
+    return flowers?.filter((flower: any) => 
+      flower.myanmar_name?.toLowerCase().includes(lowerQuery) ||
+      flower.scientific_name?.toLowerCase().includes(lowerQuery) ||
+      flower.family?.toLowerCase().includes(lowerQuery)
+    );
+  }, [flowers, debouncedQuery]);
+
+  const renderHeader = () => (
+    <>
+      <Animated.View
+        entering={FadeInDown.delay(100).duration(600)}
+        style={styles.header}
+      >
+        <Text style={styles.headerTitle}>Explore</Text>
+        <Text style={styles.headerSubtitle}>Discover new plants</Text>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.delay(200).duration(600)}
+        style={styles.searchSection}
+      >
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Feather
+              name="search"
+              size={20}
+              color={colors.text_secondary}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search Plants"
+              placeholderTextColor={colors.text_secondary}
+              value={searchInput}
+              onChangeText={setSearchInput}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={handleCameraPress}
+            style={styles.cameraButton}
+          >
+            <Ionicons name="camera-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInUp.delay(300).duration(600)}
+        style={styles.imageCardContainer}
+      >
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionTitle}>Plant Collection</Text>
+            <Text style={styles.sectionSubtitle}>
+              {filteredFlowers?.length || 0} plants for you to explore
+            </Text>
+          </View>
+        </View>
+        {filteredFlowers?.length === 0 && (
+          <View style={styles.placeholderContainer}>
+            <Ionicons name="search-outline" size={64} color={colors.text_secondary} />
+            <Text style={styles.placeholderText}>
+              Start searching for plants
+            </Text>
+          </View>
+        )}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading plants...</Text>
+          </View>
+        )}
+      </Animated.View>
+    </>
+  );
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+      <StatusBar barStyle={theme === "light" ? "dark-content" : "light-content"} backgroundColor={colors.bg_muted} />
+      <FlatList
+        data={filteredFlowers}
+        numColumns={2}
+        keyExtractor={(item) => item.id?.toString()}
+        ListHeaderComponent={renderHeader()}
+        columnWrapperStyle={{ gap: 12, marginHorizontal: 16 }}
+        contentContainerStyle={[styles.scrollContent, { gap: 12 }]}
         showsVerticalScrollIndicator={false}
-      >
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(600)}
-          style={styles.header}
-        >
-          <Text style={styles.headerTitle}>Explore</Text>
-          <Text style={styles.headerSubtitle}>Discover new plants</Text>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.delay(200).duration(600)}
-          style={styles.searchSection}
-        >
-          <View style={styles.searchContainer}>
-            <View style={styles.searchBar}>
-              <Feather
-                name="search"
-                size={20}
-                color={Colors.light.text_secondary}
-              />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search Plants"
-                placeholderTextColor={Colors.light.text_secondary}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={() => console.log("camera clicked")}
-              style={styles.cameraButton}
-            >
-              <Ionicons name="camera-outline" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInUp.delay(400).duration(600)}
-          style={styles.imageCardContainer}
-        >
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>Plant Collection</Text>
-              <Text style={styles.sectionSubtitle}>
-                {flowers?.length || 0} plants for you to explore
-              </Text>
-            </View>
-          </View>
-          {flowers?.length === 0 && (
-            <View style={styles.placeholderContainer}>
-              <Ionicons name="search-outline" size={64} color="#e5e5e5" />
-              <Text style={styles.placeholderText}>
-                Start searching for plants
-              </Text>
-            </View>
-          )}
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading plants...</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={flowers}
-              numColumns={2}
-              keyExtractor={(item) => item.id?.toString()}
-              scrollEnabled={false}
-              columnWrapperStyle={{ gap: 12 }}
-              contentContainerStyle={{ gap: 12, marginBottom: 10 }}
-              renderItem={({ item, index }) => (
-                <PlantCard
-                  item={item}
-                  index={index}
-                  onPress={handlePlantPress}
-                />
-              )}
-            />
-          )}
-        </Animated.View>
-      </ScrollView>
+        renderItem={({ item, index }) => (
+          <PlantCard
+            item={item}
+            index={index}
+            onPress={handlePlantPress}
+            colors={colors}
+          />
+        )}
+        initialNumToRender={6}
+        maxToRenderPerBatch={8}
+        windowSize={5}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors.bg_muted,
   },
   scrollView: {
     flex: 1,
@@ -237,13 +284,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontFamily: "GoogleSansFlex-Black",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   searchSection: {
     paddingHorizontal: 20,
@@ -258,7 +305,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.input_bg,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
@@ -273,13 +320,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
   },
   cameraButton: {
-    backgroundColor: "#4caf50",
+    backgroundColor: colors.bg_primary,
     padding: 14,
     borderRadius: 16,
-    shadowColor: "#4caf50",
+    shadowColor: colors.bg_primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -295,19 +342,19 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 16,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   scanButtonContainer: {
     position: "absolute",
     bottom: 120,
     right: 20,
     zIndex: 100,
-    backgroundColor: "#4caf50",
+    backgroundColor: colors.bg_primary,
     paddingHorizontal: 14,
     paddingVertical: 14,
     borderRadius: 30,
     gap: 10,
-    shadowColor: "#4caf50",
+    shadowColor: colors.bg_primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -337,13 +384,13 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 16,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
     marginBottom: 4,
   },
   appTitle: {
     fontSize: 32,
     fontFamily: "GoogleSansFlex-Black",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     letterSpacing: -0.5,
   },
   locationButton: {
@@ -355,7 +402,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: "#fff",
+    backgroundColor: colors.input_bg,
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -366,7 +413,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 12,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -377,18 +424,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontFamily: "GoogleSansFlex-Black",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   seeAllText: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: "#4caf50",
+    color: colors.bg_primary,
   },
   carouselContainer: {
     marginTop: 8,
@@ -478,7 +525,7 @@ const styles = StyleSheet.create({
   },
   indicatorActive: {
     width: 24,
-    backgroundColor: "#4caf50",
+    backgroundColor: colors.bg_primary,
   },
   loadingContainer: {
     padding: 40,
@@ -487,7 +534,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   imageCardContainer: {
     marginHorizontal: 16,
@@ -497,7 +544,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#fff",
+    backgroundColor: colors.input_bg,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -535,7 +582,7 @@ const styles = StyleSheet.create({
   },
   familyBadge: {
     alignSelf: "flex-start",
-    backgroundColor: Colors.light.bg_primary,
+    backgroundColor: colors.bg_primary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -543,21 +590,21 @@ const styles = StyleSheet.create({
   family: {
     fontSize: 10,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   myanmarName: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     lineHeight: 20,
   },
   scientificName: {
     fontSize: 12,
     fontFamily: "GoogleSansFlex-Regular",
     fontStyle: "italic",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
     lineHeight: 20,
   },
   cardFooter: {
@@ -569,6 +616,6 @@ const styles = StyleSheet.create({
   cardFooterText: {
     fontSize: 11,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
 });

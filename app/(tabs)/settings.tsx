@@ -19,11 +19,13 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
 export default function Settings() {
   const { onLogout, profile, session } = useAuth();
-  const { themeMode, setThemeMode } = useTheme();
+  const { themeMode, setThemeMode, theme } = useTheme();
+  const colors = Colors[theme];
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const userName = session?.user.user_metadata.displayName;
   const router = useRouter();
+  const styles = getStyles(colors);
   console.log(themeMode);
 
   console.log(session?.user.id);
@@ -87,7 +89,7 @@ export default function Settings() {
             <Ionicons
               name="chevron-forward"
               size={18}
-              color={Colors.light.text_secondary}
+              color={colors.text_secondary}
             />
           )}
         </View>
@@ -97,7 +99,7 @@ export default function Settings() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+      <StatusBar barStyle={theme === "light" ? "dark-content" : "light-content"} backgroundColor={colors.bg_muted} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -131,15 +133,6 @@ export default function Settings() {
               </View>
             </View>
 
-            <SettingItem
-              icon="person-outline"
-              title="Edit Profile"
-              subtitle="Update your personal information"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                // Navigate to edit profile
-              }}
-            />
 
             <SettingItem
               icon="language-outline"
@@ -176,7 +169,7 @@ export default function Settings() {
                     color={
                       themeMode === "light"
                         ? "#fff"
-                        : Colors.light.text_secondary
+                        : colors.text_secondary
                     }
                   />
                   <Text
@@ -201,7 +194,7 @@ export default function Settings() {
                     color={
                       themeMode === "dark"
                         ? "#fff"
-                        : Colors.light.text_secondary
+                        : colors.text_secondary
                     }
                   />
                   <Text
@@ -226,7 +219,7 @@ export default function Settings() {
                     color={
                       themeMode === "auto"
                         ? "#fff"
-                        : Colors.light.text_secondary
+                        : colors.text_secondary
                     }
                   />
                   <Text
@@ -243,58 +236,6 @@ export default function Settings() {
           </View>
         </Animated.View>
 
-        {/* Preferences Section */}
-        <Animated.View
-          entering={FadeInUp.delay(400).duration(600)}
-          style={styles.section}
-        >
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          <View style={styles.sectionContent}>
-            <SettingItem
-              icon="notifications-outline"
-              title="Notifications"
-              subtitle="Receive app notifications"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setNotificationsEnabled(!notificationsEnabled);
-              }}
-              showArrow={false}
-              rightComponent={
-                <Switch
-                  value={notificationsEnabled}
-                  onValueChange={(value) => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setNotificationsEnabled(value);
-                  }}
-                  trackColor={{ false: "#ddd", true: "#4caf50" }}
-                  thumbColor="#fff"
-                />
-              }
-            />
-
-            <SettingItem
-              icon="location-outline"
-              title="Location Services"
-              subtitle="Allow location access"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setLocationEnabled(!locationEnabled);
-              }}
-              showArrow={false}
-              rightComponent={
-                <Switch
-                  value={locationEnabled}
-                  onValueChange={(value) => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setLocationEnabled(value);
-                  }}
-                  trackColor={{ false: "#ddd", true: "#4caf50" }}
-                  thumbColor="#fff"
-                />
-              }
-            />
-          </View>
-        </Animated.View>
 
         {/* About Section */}
         <Animated.View
@@ -316,6 +257,7 @@ export default function Settings() {
               subtitle="Get help and contact us"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/screens/help_support" as any);
               }}
             />
             <SettingItem
@@ -324,6 +266,7 @@ export default function Settings() {
               subtitle="Read our terms and privacy policy"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/screens/terms_privacy" as any);
               }}
             />
           </View>
@@ -351,10 +294,10 @@ export default function Settings() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors.bg_muted,
   },
   scrollView: {
     flex: 1,
@@ -370,13 +313,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontFamily: "GoogleSansFlex-Black",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   section: {
     marginBottom: 24,
@@ -384,30 +327,30 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
     textTransform: "uppercase",
     letterSpacing: 1,
     paddingHorizontal: 20,
     marginBottom: 12,
   },
   sectionContent: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.input_bg,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#e5e5e5",
+    borderColor: colors.bg_muted,
   },
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e5e5",
+    borderBottomColor: colors.bg_muted,
   },
   profileAvatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.light.bg_secondary + "30",
+    backgroundColor: colors.bg_secondary + "30",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -418,13 +361,13 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     marginBottom: 4,
   },
   profileEmail: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   settingItemContainer: {
     flexDirection: "row",
@@ -433,7 +376,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.bg_muted,
   },
   settingItem: {
     flexDirection: "row",
@@ -442,10 +385,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.bg_muted,
   },
   settingItemPressed: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors.bg_muted,
   },
   settingItemLeft: {
     flexDirection: "row",
@@ -456,7 +399,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.light.bg_secondary + "20",
+    backgroundColor: colors.bg_secondary + "20",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -467,13 +410,13 @@ const styles = StyleSheet.create({
   settingItemTitle: {
     fontSize: 16,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_primary,
+    color: colors.text_primary,
     marginBottom: 2,
   },
   settingItemSubtitle: {
     fontSize: 13,
     fontFamily: "GoogleSansFlex-Regular",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   settingItemRight: {
     flexDirection: "row",
@@ -488,7 +431,7 @@ const styles = StyleSheet.create({
   themeLabel: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -507,8 +450,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#e5e5e5",
-    backgroundColor: "#f8f9fa",
+    borderColor: colors.bg_muted,
+    backgroundColor: colors.input_bg,
   },
   themeOptionActive: {
     backgroundColor: "#4caf50",
@@ -517,7 +460,7 @@ const styles = StyleSheet.create({
   themeOptionText: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: Colors.light.text_secondary,
+    color: colors.text_secondary,
   },
   themeOptionTextActive: {
     color: "#fff",

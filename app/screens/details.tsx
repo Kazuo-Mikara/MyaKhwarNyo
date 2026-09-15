@@ -1,16 +1,14 @@
 import HorizontalPlantCard from "@/components/HorizontalPlantCard";
 import { Colors } from "@/constants/theme";
 import { useLanguage } from "@/context/LanguageContext";
-import { useFavoriteFlowers } from "@/hooks/handleFavoriteFlowers";
 import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
-import { useMostFavoriteFlowers } from "@/hooks/useMostFavriteFlowers";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, Linking } from "react-native";
 import Animated, {
   FadeInUp,
   useAnimatedStyle,
@@ -30,11 +28,8 @@ export default function Details() {
   const localParams = useLocalSearchParams();
   const route = useRoute();
   const router = useRouter();
-  const [isFavorite, setIsFavorite] = useState(false);
   const { language } = useLanguage();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const { addFavoriteFlower, removeFromFavorite, getFavoriteFlowers } =
-    useFavoriteFlowers();
   const { addSavedFlower, removeFromSavedFlower, getSavedFlowers } =
     useSavedFlowers();
   const params = (
@@ -69,13 +64,10 @@ export default function Details() {
   } = params;
   const displayName = myanmar_name || name || "Plant Details";
 
-  const favoriteScale = useSharedValue(1);
+
   const bookmarkScale = useSharedValue(1);
   const shareScale = useSharedValue(1);
 
-  const favoriteAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: favoriteScale.value }],
-  }));
 
   const bookmarkAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bookmarkScale.value }],
@@ -85,28 +77,7 @@ export default function Details() {
     transform: [{ scale: shareScale.value }],
   }));
 
-  const handleFavorite = async (flowerId: string) => {
-    favoriteScale.value = withSpring(0.8, {}, () => {
-      favoriteScale.value = withSpring(1);
-    });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    if (newStatus) {
-      await addFavoriteFlower(flowerId);
-    } else {
-      await removeFromFavorite(flowerId);
-    }
-  };
-
   useEffect(() => {
-    const checkFavorite = async () => {
-      const favorites = await getFavoriteFlowers();
-      if (favorites) {
-        setIsFavorite(favorites.some((fav: any) => fav.flower_id === id));
-      }
-    };
-    checkFavorite();
     const checkBookmark = async () => {
       const bookmarks = await getSavedFlowers();
       if (Array.isArray(bookmarks)) {
@@ -137,6 +108,10 @@ export default function Details() {
       shareScale.value = withSpring(1);
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const nameToSearch = displayName || scientific_name || name;
+    if (nameToSearch) {
+      Linking.openURL(`https://www.google.com/search?q=${encodeURIComponent(nameToSearch)}`);
+    }
   };
 
   return (
@@ -181,7 +156,7 @@ export default function Details() {
             <View style={styles.headerRightActions}>
               <Pressable onPress={handleShare} style={styles.iconButton}>
                 <Animated.View style={shareAnimatedStyle}>
-                  <Ionicons name="share-social-outline" size={22} color="#fff" />
+                  <Ionicons name="search-outline" size={22} color="#fff" />
                 </Animated.View>
               </Pressable>
               
@@ -195,15 +170,7 @@ export default function Details() {
                 </Animated.View>
               </Pressable>
 
-              <Pressable onPress={() => handleFavorite(id)} style={styles.iconButton}>
-                <Animated.View style={favoriteAnimatedStyle}>
-                  <Ionicons
-                    name={isFavorite ? "heart" : "heart-outline"}
-                    size={22}
-                    color={isFavorite ? "#ff4757" : "#fff"}
-                  />
-                </Animated.View>
-              </Pressable>
+
             </View>
           </View>
 
@@ -284,15 +251,18 @@ export default function Details() {
              </View>
            </View>
 
-           {/* Similar Plants */}
+           {/* Wikipedia Reference */}
            <View style={styles.section}>
              <View style={styles.rowBetween}>
-                <Text style={styles.sectionTitle}>Similar Plants</Text>
-                <Pressable>
-                    <Text style={styles.seeAllText}>See All</Text>
-                </Pressable>
+                <Text style={styles.sectionTitle}>Read More</Text>
              </View>
-             <HorizontalList />
+             <Pressable
+                style={{ paddingVertical: 10, flexDirection: 'row', alignItems: 'center' }}
+                onPress={() => Linking.openURL(`https://en.wikipedia.org/wiki/${encodeURIComponent(scientific_name || name)}`)}
+             >
+                <Ionicons name="globe-outline" size={24} color="#000" style={{ marginRight: 10 }} />
+                <Text style={{ fontSize: 16, color: "#009688", fontFamily: "GoogleSansFlex-Regular" }}>View on Wikipedia</Text>
+             </Pressable>
            </View>
         </Animated.View>
       </ScrollView>
@@ -305,41 +275,7 @@ export default function Details() {
   );
 }
 
-const HorizontalList = () => {
-    const { data: favoriteFlowers } = useMostFavoriteFlowers();
-    const router = useRouter();
-  
-    const handlePress = (item: any) => {
-      router.push({
-        pathname: "/screens/details",
-        params: {
-          name: item.scientific_name,
-          ...item,
-        },
-      });
-    };
-  
-    if (!favoriteFlowers || favoriteFlowers.length === 0) {
-      return null;
-    }
-  
-    return (
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 10, paddingLeft: 4 }}
-      >
-        {favoriteFlowers.map((item: any, index: number) => (
-          <HorizontalPlantCard
-            key={item.id}
-            item={item}
-            index={index}
-            onPress={handlePress}
-          />
-        ))}
-      </ScrollView>
-    );
-  };
+
 
 const styles = StyleSheet.create({
   container: {

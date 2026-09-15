@@ -1,7 +1,9 @@
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import fetchData from "@/hooks/fetchData";
+import fetchData, { fetchFlowerById } from "@/hooks/fetchData";
+import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
+import useDateFormat from "@/hooks/useDateFormat";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useCameraPermissions } from "expo-camera";
@@ -35,7 +37,7 @@ const imageSharedTransition =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (Animated as any).SharedTransition
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((Animated as any).SharedTransition as any).duration(550).springify()
+    ((Animated as any).SharedTransition as any).duration(550).springify()
     : undefined;
 
 // Plant Card Component
@@ -57,8 +59,8 @@ const PlantCard = React.memo(({ item, index, onPress, colors }: PlantCardProps) 
     <Animated.View
       entering={FadeInDown.delay(500 + index * 50).duration(600)}
       style={[
-        styles.imageCard, 
-        animatedStyle, 
+        styles.imageCard,
+        animatedStyle,
         { backgroundColor: colors.input_bg }
       ]}
     >
@@ -87,9 +89,6 @@ const PlantCard = React.memo(({ item, index, onPress, colors }: PlantCardProps) 
             resizeMode="cover"
           />
           <View style={styles.imageOverlay}>
-            <View style={styles.favoriteButton}>
-              <Ionicons name="heart-outline" size={18} color="#fff" />
-            </View>
           </View>
         </View>
         <View style={styles.textContainer}>
@@ -120,37 +119,35 @@ const PlantCard = React.memo(({ item, index, onPress, colors }: PlantCardProps) 
 
 PlantCard.displayName = "PlantCard";
 
-const mock_data = [
-  {
-    name: "daisy",
-    scientificName: "Bellis perennis",
-    url: "https://imgcdn.stablediffusionweb.com/2024/12/3/40412e1e-1190-423d-b0ac-6ff59568ff6a.jpg",
-    date: "Today, 9:00AM",
-  },
-  {
-    name: "sunflower",
-    scientificName: "Helianthus annuus",
-    url: "https://www.selectseeds.com/cdn/shop/products/1201-2-zoom_800x.jpg?v=1687465191",
-    date: "Yesterday",
-  },
-  {
-    name: "tulip",
-    scientificName: "Tulipa",
-    url: "https://www.colorblends.com/wp-content/uploads/2020/01/1504_BestPurple_CGC2662sq.jpg",
-    date: "September 8",
-  },
-];
-
 export default function Home() {
   const { theme } = useTheme();
-    const {  session } = useAuth();
+  const { session } = useAuth();
   const colors = Colors[theme];
   const router = useRouter();
-   const userName = session?.user.user_metadata.displayName;
+  const userName = session?.user.user_metadata.displayName;
   const [permission, requestPermission] = useCameraPermissions();
-  const [userLocation] = useState("");
+
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const carouselRef = useRef<FlatList>(null);
+  const { getSavedFlowers } = useSavedFlowers();
+  const userId = session?.user?.id;
+  const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
+
+  const { data: savedFlowers = [], isLoading: isSavedLoading } = useQuery({
+    queryKey: ["savedFlowers", userId],
+    queryFn: async () => {
+      const getSaveFlowers = await getSavedFlowers();
+      if (!getSaveFlowers || !Array.isArray(getSaveFlowers)) return [];
+      const flowerData = await Promise.all(
+        getSaveFlowers.map(async (flower: any) => {
+          const data = await fetchFlowerById(flower.flower_id);
+          return data ? { ...data, saved_at: flower.created_at } : null;
+        }),
+      );
+      return flowerData.filter((f) => f !== null);
+    },
+    enabled: !!userId,
+  });
 
   const { data: flowers, isLoading } = useQuery({
     queryKey: ["home_flowers"],
@@ -210,106 +207,104 @@ export default function Home() {
           entering={FadeInDown.delay(100).duration(600)}
           style={styles.headerContainer}
         >
-              {/* <Text style={[styles.appTitle, { color: colors.text_primary }]}>Mya Khwar Nyo</Text> */}
+          {/* <Text style={[styles.appTitle, { color: colors.text_primary }]}>Mya Khwar Nyo</Text> */}
           <View style={styles.headerContent}>
             <View style={styles.greetingContainer}>
               <Text style={[styles.greeting, { color: colors.text_secondary }]}>Hello! 👋</Text>
               <Text style={[styles.greetingUsername, { color: colors.text_primary }]}>{userName}</Text>
             </View>
-            <Pressable
-              onPress={() =>
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-              }
-              style={styles.locationButton}
-            >
-              <View style={[styles.locationButtonInner, { backgroundColor: colors.input_bg }]}>
-                <Ionicons name="location" size={18} color={colors.text_primary} />
-                <Text style={[styles.locationText, { color: colors.text_primary }]}>
-                  {userLocation ? userLocation : "Set location"}
-                </Text>
-              </View>
-            </Pressable>
+
           </View>
         </Animated.View>
 
         {/* Enhanced Recent Scans Carousel */}
         <Animated.View entering={FadeInUp.delay(200).duration(600)}>
           <View style={styles.sectionHeader}>
-            
+
             <View>
-              <Text style={[styles.sectionTitle, { color: colors.text_primary }]}>Recent Scans</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.text_secondary }]}>Your plant discoveries</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text_primary }]}>Your Garden</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.text_secondary }]}>Your favourite flowers</Text>
             </View>
             <Pressable
-              onPress={() =>
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-              }
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/(tabs)/history");
+              }}
             >
               <Text style={[styles.seeAllText, { color: colors.bg_primary }]}>See All →</Text>
             </Pressable>
           </View>
 
           <View style={styles.carouselContainer}>
-            <FlatList
-              ref={carouselRef}
-              data={mock_data}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={onCarouselScroll}
-              scrollEventThrottle={16}
-              snapToInterval={CARD_WIDTH + 20}
-              decelerationRate="fast"
-              contentContainerStyle={{ paddingRight: 20 }}
-              renderItem={({ item, index }) => (
-                <Animated.View
-                  entering={FadeInRight.delay(300 + index * 100).duration(600)}
-                  style={[styles.carouselCard, { width: CARD_WIDTH }]}
-                >
-                  <ImageBackground
-                    source={{ uri: item.url }}
-                    resizeMode="cover"
-                    style={styles.carouselImage}
-                    imageStyle={styles.carouselImageStyle}
-                  >
-                    <View style={styles.carouselGradient}>
-                      <View style={styles.carouselContent}>
-                        <View style={[styles.carouselBadge, { backgroundColor: colors.bg_primary }]}>
-                          <Ionicons name="camera" size={14} color="#fff" />
-                          <Text style={styles.carouselBadgeText}>Scanned</Text>
-                        </View>
-                        <View style={styles.carouselTextContainer}>
-                          <Text style={styles.carouselName}>{item.name}</Text>
-                          <Text style={styles.carouselScientificName}>
-                            {item.scientificName}
-                          </Text>
-                          <View style={styles.carouselDateContainer}>
-                            <Ionicons
-                              name="time-outline"
-                              size={14}
-                              color="#fff"
-                            />
-                            <Text style={styles.carouselDate}>{item.date}</Text>
+            {savedFlowers.length > 0 ? (
+              <>
+                <FlatList
+                  ref={carouselRef}
+                  data={savedFlowers}
+                  horizontal
+                  pagingEnabled={savedFlowers.length > 1}
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={onCarouselScroll}
+                  scrollEventThrottle={16}
+                  snapToInterval={CARD_WIDTH + 20}
+                  decelerationRate="fast"
+                  contentContainerStyle={{ paddingRight: 20 }}
+                  renderItem={({ item, index }) => (
+                    <Animated.View
+                      entering={FadeInRight.delay(300 + index * 100).duration(600)}
+                      style={[styles.carouselCard, { width: CARD_WIDTH }]}
+                    >
+                      <Pressable onPress={() => handlePlantPress(item)}>
+                        <ImageBackground
+                          source={
+                            item.image_url
+                              ? { uri: supabase_s3 + item.image_url }
+                              : require("@/assets/images/Bauhinia_purpurea_L.jpg")
+                          }
+                          resizeMode="cover"
+                          style={styles.carouselImage}
+                          imageStyle={styles.carouselImageStyle}
+                        >
+                          <View style={styles.carouselGradient}>
+                            <View style={styles.carouselContent}>
+                              <View style={styles.carouselTextContainer}>
+                                <Text style={styles.carouselName}>
+                                  {item.myanmar_name || item.name}
+                                </Text>
+                                <Text style={styles.carouselScientificName}>
+                                  {item.scientific_name}
+                                </Text>
+                              </View>
+                            </View>
                           </View>
-                        </View>
-                      </View>
-                    </View>
-                  </ImageBackground>
-                </Animated.View>
-              )}
-            />
-            {/* Enhanced Indicators */}
-            <View style={styles.indicatorsContainer}>
-              {mock_data.map((_, i) => (
-                <Animated.View
-                  key={i}
-                  style={[
-                    styles.indicator,
-                    currentCarouselIndex === i && { ...styles.indicatorActive, backgroundColor: colors.bg_primary },
-                  ]}
+                        </ImageBackground>
+                      </Pressable>
+                    </Animated.View>
+                  )}
                 />
-              ))}
-            </View>
+                {/* Indicators - Only show if more than 1 image */}
+                {savedFlowers.length > 1 && (
+                  <View style={styles.indicatorsContainer}>
+                    {savedFlowers.map((_, i) => (
+                      <Animated.View
+                        key={i}
+                        style={[
+                          styles.indicator,
+                          currentCarouselIndex === i && { ...styles.indicatorActive, backgroundColor: colors.bg_primary },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                )}
+              </>
+            ) : (
+              <View style={[styles.carouselCard, { width: CARD_WIDTH, height: 200, backgroundColor: colors.input_bg, justifyContent: "center", alignItems: "center" }]}>
+                <Ionicons name="leaf-outline" size={48} color={colors.text_secondary} />
+                <Text style={{ color: colors.text_secondary, marginTop: 12, fontFamily: "GoogleSansFlex-Regular" }}>
+                  Your garden is empty
+                </Text>
+              </View>
+            )}
           </View>
         </Animated.View>
         {/* Enhanced Plant Grid */}
@@ -403,24 +398,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
- 
+
   appTitle: {
     fontSize: 32,
     fontFamily: "GoogleSansFlex-Black",
     letterSpacing: -0.5,
   },
-   greetingContainer: {
+  greetingContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-   
+
   },
-   greeting: {
+  greeting: {
     fontSize: 16,
     fontFamily: "GoogleSansFlex-Regular",
     marginBottom: 4,
   },
-   greetingUsername: {
+  greetingUsername: {
     fontSize: 20,
     fontFamily: "GoogleSansFlex-Black",
     marginBottom: 4,
@@ -445,7 +440,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "GoogleSansFlex-Regular",
   },
- 
+
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

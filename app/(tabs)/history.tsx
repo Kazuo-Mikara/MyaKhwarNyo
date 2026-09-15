@@ -3,6 +3,8 @@ import { fetchFlowerById } from "@/hooks/fetchData";
 import { useSavedFlowers } from "@/hooks/handleSavedFlowers";
 import useDateFormat from "@/hooks/useDateFormat";
 import { supabase } from "@/providers/SupabaseClient";
+import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,6 +19,7 @@ import {
     StyleSheet,
     Text,
     View,
+    Linking,
 } from "react-native";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 
@@ -27,6 +30,9 @@ export default function History() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const supabase_s3 = process.env.EXPO_PUBLIC_SUPABASE_S3_ADDRESS as string;
+  const { theme } = useTheme();
+  const colors = Colors[theme];
+  const styles = getStyles(colors);
 
   // useQuery for fetching and caching saved flowers
   const { data: savedFlowers = [], isLoading } = useQuery({
@@ -89,13 +95,16 @@ useFocusEffect(
 
   const handleShare = (flower: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log("Sharing flower:", flower.name);
+    const plantName = flower.myanmar_name || flower.name || flower.scientific_name;
+    if (plantName) {
+      Linking.openURL(`https://www.google.com/search?q=${encodeURIComponent(plantName)}`);
+    }
   };
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle={theme === "light" ? "dark-content" : "light-content"} backgroundColor={colors.bg_muted} />
         <Text style={styles.placeholderText}>Growing your garden...</Text>
       </View>
     );
@@ -103,7 +112,7 @@ useFocusEffect(
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme === "light" ? "dark-content" : "light-content"} backgroundColor={colors.bg_muted} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -119,7 +128,7 @@ useFocusEffect(
 
         {savedFlowers.length === 0 ? (
           <View style={styles.placeholderContainer}>
-            <Ionicons name="leaf-outline" size={64} color="#e5e5e5" />
+            <Ionicons name="leaf-outline" size={64} color={colors.text_secondary} />
             <Text style={styles.placeholderText}>Your garden is empty</Text>
           </View>
         ) : (
@@ -179,7 +188,7 @@ useFocusEffect(
                     onPress={() => handleShare(flower)}
                     style={styles.iconButton}
                   >
-                    <Ionicons name="share-outline" size={20} color="#1c1e21" />
+                    <Ionicons name="search-outline" size={20} color={colors.text_primary} />
                   </Pressable>
 
                   <Pressable
@@ -198,16 +207,16 @@ useFocusEffect(
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f2f5",
+    backgroundColor: colors.bg_muted,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors.bg_muted,
   },
   scrollView: {
     flex: 1,
@@ -224,18 +233,18 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     paddingHorizontal: 16,
     paddingBottom: 10,
-    backgroundColor: "#fff",
+    backgroundColor: colors.bg_muted,
   },
   headerTitle: {
     fontSize: 28,
     fontFamily: "GoogleSansFlex-Black",
-    color: "#1c1e21",
+    color: colors.text_primary,
     marginBottom: 2,
   },
   headerSubtitle: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Regular",
-    color: "#65676b",
+    color: colors.text_secondary,
   },
   listContainer: {
     zIndex: 10,
@@ -243,7 +252,7 @@ const styles = StyleSheet.create({
     marginBottom: 200,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.input_bg,
     marginBottom: 8,
     padding: 12,
 
@@ -263,7 +272,7 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 8,
-    backgroundColor: "#f0f2f5",
+    backgroundColor: colors.bg_muted,
   },
   contentContainer: {
     flex: 1,
@@ -273,7 +282,7 @@ const styles = StyleSheet.create({
   flowerName: {
     fontSize: 17,
     fontFamily: "GoogleSansFlex-Bold",
-    color: "#1c1e21",
+    color: colors.text_primary,
     lineHeight: 22,
     marginBottom: 4,
   },
@@ -281,7 +290,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontStyle: "italic",
     fontFamily: "GoogleSansFlex-Regular",
-    color: "#65676b",
+    color: colors.text_secondary,
     marginBottom: 8,
   },
   attributionRow: {
@@ -300,13 +309,13 @@ const styles = StyleSheet.create({
   attributionText: {
     fontSize: 12,
     fontFamily: "GoogleSansFlex-Regular",
-    color: "#65676b",
+    color: colors.text_secondary,
   },
   dateText: {
     marginTop: 4,
     fontSize: 11,
     fontFamily: "GoogleSansFlex-Regular",
-    color: "#65676b",
+    color: colors.text_secondary,
   },
   actionsRow: {
     flexDirection: "row",
@@ -316,7 +325,7 @@ const styles = StyleSheet.create({
   detailsButton: {
     flex: 1,
     height: 36,
-    backgroundColor: "#e4e6eb",
+    backgroundColor: colors.bg_muted,
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
@@ -324,12 +333,12 @@ const styles = StyleSheet.create({
   detailsButtonText: {
     fontSize: 14,
     fontFamily: "GoogleSansFlex-Bold",
-    color: "#1c1e21",
+    color: colors.text_primary,
   },
   iconButton: {
     width: 36,
     height: 36,
-    backgroundColor: "#e4e6eb",
+    backgroundColor: colors.bg_muted,
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
@@ -343,6 +352,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 16,
     fontFamily: "GoogleSansFlex-Regular",
-    color: "#65676b",
+    color: colors.text_secondary,
   },
 });
