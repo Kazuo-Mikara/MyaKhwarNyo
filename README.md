@@ -1,50 +1,96 @@
-# Welcome to your Expo app 👋
+🌿 Mya Khwar Nyo (မြခွာညို) - AI-Based Plant Classification System
+An end-to-end computer vision system for real-time plant and flower species identification, designed for the University of Yangon botanical academic context.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+https://via.placeholder.com/1000x300?text=Mya+Khwar+Nyo+Banner+Image
 
-## Get started
+Mya Khwar Nyo is a cross-platform mobile application that leverages advanced Deep Learning architectures to instantly identify 37 distinct plant and flower species. Built as a Final Year Capstone/Bachelor's Thesis project, it features a decoupled client-server architecture to ensure lightweight, real-time edge performance.
 
-1. Install dependencies
+✨ Key Features
+📸 Real-Time Classification: Snap a photo or upload from the gallery for instant inference.
 
-   ```bash
-   npm install
-   ```
+🧠 State-of-the-Art AI: Powered by a highly optimized Swin Transformer model (achieving 94.0% accuracy), with fallback YOLOv8 and ConvNeXt pipelines.
 
-2. Start the app
+📚 Rich Botanical Data: Detailed taxonomic profiles, characteristics, and optimal care tips (water, light, temperature) for each detected species.
 
-   ```bash
-   npx expo start
-   ```
+🌍 Bilingual Support: Seamlessly toggle between English and Burmese (Myanmar) interfaces.
 
-In the output, you'll find options to open the app in a
+🪴 Personal Garden History: Save your botanical discoveries to a personal collection history, securely synced to the cloud.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+🔍 Quick Research: Integrated direct Google Search routing for further species exploration.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+🌙 Adaptive UI: Clean, glassmorphism-inspired design with Dark Mode support for authentication screens.
 
-## Get a fresh project
+📱 App Interface
+Authentication & Onboarding	Home Dashboard	Plant Details & Taxonomy
+https://via.placeholder.com/250x500?text=Login+/+Signup	https://via.placeholder.com/250x500?text=Home+Dashboard	https://via.placeholder.com/250x500?text=Plant+Details
+Scan & Inference	Garden / Collection History	App Settings
+https://via.placeholder.com/250x500?text=Camera+Scanner	https://via.placeholder.com/250x500?text=Garden+History	https://via.placeholder.com/250x500?text=Settings+&+Language
+🏗️ System Architecture & Tech Stack
+The system utilizes a decoupled, client-server paradigm to maintain scalability and stateless communication.
 
-When you're ready, run:
+https://via.placeholder.com/800x400?text=Client-Server+Architecture+Diagram
 
-```bash
-npm run reset-project
-```
+Frontend (Mobile Client)
+Framework: React Native / Expo
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Features: Native camera integration, async REST API client, state-driven navigation.
 
-## Learn more
+Backend (Cloud & API)
+API Framework: FastAPI (Python)
 
-To learn more about developing your project with Expo, look at the following resources:
+Database & Auth: Supabase (PostgreSQL) for user management and structured botanical data storage.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Hosting: Hugging Face Inference Endpoints for containerized, scalable model deployment.
 
-## Join the community
+Machine Learning Pipeline
+Primary Engine: Swin Transformer (Shifted-Window Vision Transformer)
 
-Join our community of developers creating universal apps.
+Baseline/Fallback Models: YOLOv8, ConvNeXt-Tiny, ResNet-50
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Framework: PyTorch
+
+Dataset: 210 curated, localized high-quality images across 37 classes, heavily augmented (spatial, color-space) to prevent overfitting.
+
+🚀 Getting Started
+Prerequisites
+Node.js & npm/Yarn
+
+Expo CLI (npm install -g expo-cli)
+
+Android Studio (for Android Emulator) or Xcode (for iOS Simulator)
+
+Python 3.10+ (for local backend testing)
+
+Installation
+1. Clone the repository
+
+bash
+git clone https://github.com/yourusername/MyaKhwarNyo.git
+cd MyaKhwarNyo
+2. Install Frontend Dependencies
+
+bash
+npm install
+3. Configure Environment Variables
+
+Create a .env file in the root directory and add your keys:
+
+env
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+EXPO_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
+EXPO_PUBLIC_HF_ENDPOINT=your_huggingface_api_endpoint
+4. Run the App
+
+bash
+npx expo run:android
+# or
+npx expo run:ios
+🔬 Model Performance Metrics
+Our models were rigorously trained using a two-stage transfer learning protocol. Below are the final evaluation results on the localized test dataset:
+
+Architecture	Paradigm	Overall Accuracy	Precision	Recall	F1-Score
+Swin-T	Attention-Based	94.0%	93.8%	93.5%	93.6%
+ConvNeXt-T	Modern CNN	91.0%	90.8%	90.4%	90.6%
+ResNet-50	Residual CNN	90.0%	89.5%	89.2%	89.3%
+🤝 Acknowledgments
+Developed as a partial fulfillment of the requirements for the Degree of Bachelor of Science in Computer Science at the University of Yangon (December 2026). Special thanks to the Department of Computer Studies.
