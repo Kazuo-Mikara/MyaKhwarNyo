@@ -24,7 +24,7 @@
 
 | Authentication & Onboarding | Home  | Plant Details & Taxonomy |
 | :---: | :---: | :---: |
-| ![Auth Placeholder](./assets/images/screenshots/Login.png) | ![Home Placeholder](./assets/images/screenshots/Home.png) | ![Details Placeholder](./assets/images/screenshots/Explore.png) |
+| ![Auth Placeholder](./assets/images/screenshots/Login.png) | ![Home Placeholder](./assets/images/screenshots/Home.png) | ![Details Placeholder](./assets/images/screenshots/Result.png) |
 
 | Scan & Inference | Garden / Collection History | App Settings |
 | :---: | :---: | :---: |
