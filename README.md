@@ -22,13 +22,13 @@
 
 ## 📱 App Interface
 
-| Authentication & Onboarding | Home Dashboard | Plant Details & Taxonomy |
+| Authentication & Onboarding | Home  | Plant Details & Taxonomy |
 | :---: | :---: | :---: |
-| ![Auth Placeholder](https://via.placeholder.com/250x500?text=Login+/+Signup) | ![Home Placeholder](https://via.placeholder.com/250x500?text=Home+Dashboard) | ![Details Placeholder](https://via.placeholder.com/250x500?text=Plant+Details) |
+| ![Auth Placeholder](./assets/images/screenshots/Login.png) | ![Home Placeholder](./assets/images/screenshots/Home.png) | ![Details Placeholder](./assets/images/screenshots/Explore.png) |
 
 | Scan & Inference | Garden / Collection History | App Settings |
 | :---: | :---: | :---: |
-| ![Scan Placeholder](https://via.placeholder.com/250x500?text=Camera+Scanner) | ![Garden Placeholder](https://via.placeholder.com/250x500?text=Garden+History) | ![Settings Placeholder](https://via.placeholder.com/250x500?text=Settings+&+Language) |
+| ![Scan Placeholder](./assets/images/screenshots/Scan.png) | ![Garden Placeholder](./assets/images/screenshots/History.png) | ![Settings Placeholder](./assets/images/screenshots/Settings.png) |
 
 ---
 
@@ -36,7 +36,7 @@
 
 The system utilizes a decoupled, client-server paradigm to maintain scalability and stateless communication.
 
-![Architecture Placeholder](https://via.placeholder.com/800x400?text=Client-Server+Architecture+Diagram)
+![Architecture Placeholder](./assets/images/screenshots/Architecture.png)
 
 ### **Frontend (Mobile Client)**
 * **Framework:** React Native / Expo
@@ -67,13 +67,44 @@ The system utilizes a decoupled, client-server paradigm to maintain scalability 
 
 **1. Clone the repository**
 ```bash
-git clone [https://github.com/yourusername/MyaKhwarNyo.git](https://github.com/yourusername/MyaKhwarNyo.git)
+git clone https://github.com/Kazuo-Mikara/MyaKhwarNyo.git
 cd MyaKhwarNyo
-2. Install Frontend DependenciesBashnpm install
-3. Configure Environment VariablesCreate a .env file in the root directory and add your keys:Code snippetEXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+```
+
+**2. Install Frontend Dependencies**
+```bash
+npm install
+```
+
+**3. Configure Environment Variables**
+```bash
+Create a .env file in the root directory and add your keys:
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
 EXPO_PUBLIC_HF_ENDPOINT=your_huggingface_api_endpoint
-4. Run the AppBashnpx expo run:android
+```
+
+**4. Run the App**
+```bash
+npx expo run:android
 # or
 npx expo run:ios
-🔬 Model Performance MetricsOur models were rigorously trained using a two-stage transfer learning protocol. Below are the final evaluation results on the localized test dataset:ArchitectureParadigmOverall AccuracyPrecisionRecallF1-ScoreSwin-TAttention-Based94.0%93.8%93.5%93.6%ConvNeXt-TModern CNN91.0%90.8%90.4%90.6%ResNet-50Residual CNN90.0%89.5%89.2%89.3%🤝 AcknowledgmentsDeveloped as a partial fulfillment of the requirements for the Degree of Bachelor of Science in Computer Science at the University of Yangon (December 2026).Special thanks to the Department of Computer Studies.
+```
+## If you want to explore how the backend is built, please refer to the [MyaKhwarNyo - Backend](https://github.com/Kazuo-Mikara/MyaKhwarNyo_backend.git).
+
+
+## 🔬 Model Performance Metrics
+
+Our models were rigorously trained using a two-stage transfer learning protocol. Below are the final evaluation results on the localized test dataset:
+
+Architecture | Paradigm | Overall Accuracy | Precision | Recall | F1-Score 
+------------|-----------|------------------|-----------|--------|---------  
+Swin-T | Attention-Based | 94.0% | 93.8% | 93.5% | 93.6%  
+ConvNeXt-T | Modern CNN | 91.0% | 90.8% | 90.4% | 90.6%  
+ResNet-50 | Residual CNN | 90.0% | 89.5% | 89.2% | 89.3%  
+
+## 🤝 Acknowledgments
+
+Developed as a partial fulfillment of the requirements for the Degree of Bachelor of Science in Computer Science at the University of Yangon (December 2026).
+
+Special thanks to the Department of Computer Studies.
