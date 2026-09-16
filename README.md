@@ -49,7 +49,7 @@ The system utilizes a decoupled, client-server paradigm to maintain scalability 
 
 ### **Machine Learning Pipeline**
 * **Primary Engine:** Swin Transformer (Shifted-Window Vision Transformer)
-* **Baseline/Fallback Models:** YOLOv8, ConvNeXt-Tiny, ResNet-50
+* **Baseline/Fallback Models:** YOLOv11, ConvNeXt-Tiny, ResNet-50
 * **Framework:** PyTorch
 * **Dataset:** 210 curated, localized high-quality images across 37 classes, heavily augmented (spatial, color-space) to prevent overfitting.
 
